@@ -8,6 +8,7 @@ library.
 First and foremost install the dependencies using:
 ```
 npm install
+npm install -g kafkacat
 ```
 
 The controller needs the car IDs to connect to the cars. The IDs can be retrieved using the 
@@ -28,10 +29,18 @@ carid=adf93c91ff4543638bfd905af63a4a36
 startlane=1
 ```
 
+By default, the Kafka server is expected to listen on 127.0.0.1. If another server is being used, the server IPs for edge and cloud can be configured through the respective env variables:
+```
+export KAFKA_EDGE_SERVER=v.x.y.z
+export KAFKA_CLOUD_SERVER=v.x.y.z
+```
+
+For running Kafka in Doicker see TODO
+
 ## Running locally
 The service can be started locally by running
 ```
-node controller.js
+node controller.js <config-filename>
 ```
 
 Kafka messages can be produced and consumed from command line using:

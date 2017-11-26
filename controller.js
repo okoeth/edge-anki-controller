@@ -29,16 +29,22 @@ var readCharacteristic;
 var writeCharacteristic;
 var car;
 var lane;
-var kafkaServer = process.env.KAFKA_SERVER;
+var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
+var kafkaCloudServer = process.env.KAFKA_CLOUD_SERVER;
 
-if (kafkaServer==null){
-  console.log('Using 127.0.0.1 as default Kafka server.');
-  kafkaServer='127.0.0.1'
+if (kafkaEdgeServer==null){
+  console.log('Using 127.0.0.1 as default Kafka edge server.');
+  kafkaEdgeServer='127.0.0.1'
+}
+
+if (kafkaCloudServer==null){
+  console.log('Using 127.0.0.1 as default Kafka cloud server.');
+  kafkaCloudServer='127.0.0.1'
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Set-up Kafak client, producer, and consumer
-var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaServer+':9092'});
+var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
 var kafkaProducer = new kafka.Producer(kafkaClient);
 
 kafkaProducer.on('ready', function () {
