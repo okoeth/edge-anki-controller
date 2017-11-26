@@ -1,3 +1,4 @@
+.DS_Store
 node_modules
 config-car1.properties
 config-car2.properties
