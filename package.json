@@ -1,0 +1,21 @@
+{
+  "name": "anki-controller",
+  "description": "Node.js and Kafka for Anki Overdrive",
+  "version": "0.0.1",
+  "author": "NTT Group",
+  "dependencies": {
+    "noble": "~1.2.1",
+    "async": "~0.2.9",
+    "kafka-node": "2.3.0",
+    "properties": "1.2.1"
+  },
+  "keywords": [
+    "node",
+    "cloudwan",
+    "iot",
+    "kafka",
+    "anki",
+    "overdrive"
+  ],
+  "license": "MIT"
+}
