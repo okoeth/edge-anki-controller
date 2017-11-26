@@ -19,5 +19,10 @@
 # OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 # DEALINGS IN THE SOFTWARE.
 
-docker build -t okoeth/mwc-controller .
-docker push okoeth/mwc-controller
+if [ x = x$DOCKER_USER ]; then
+	echo "The variable $DOCKER_USER is not set. Try: export DOCKER_USER=<your-docker-id>" 
+	exit 1
+fi
+
+docker build -t $DOCKER_USER/mwc-controller .
+docker push $DOCKER_USER/mwc-controller
