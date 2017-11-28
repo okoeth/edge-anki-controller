@@ -17,36 +17,13 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-const EventEmitter = require('events');
-const ServiceMock = require('./service_mock');
+class Tile {
 
-class PeripheralMock extends EventEmitter {
-    constructor(carId, readCharacteristicsMock) {
-        super();
-
-        this.id = carId;
-        this.advertisement = {
-            serviceUuids : ["be15beef6186407e83810bd89c4d8df4"]
-        };
-        this.services = [ new ServiceMock(readCharacteristicsMock) ];
-    }
-
-    connect(callback) {
-        console.log("Mock connect");
-        if(callback !== undefined)
-            callback();
-    }
-
-    disconnect() {
-        console.log("Mock disconnect");
-    }
-
-    discoverServices(filter, callback) {
-        console.log("Mock discover services");
-
-        if(callback !== undefined)
-            callback(undefined, this.services);
+    constructor(id, realId, type) {
+       this.id = id;
+       this.realId = realId;
+       this.type = type;
     }
 }
 
-module.exports = PeripheralMock;
+module.exports = Tile;

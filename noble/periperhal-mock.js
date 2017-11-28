@@ -17,9 +17,36 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-module.exports.create = function(type) {
-    if(type === "mock")
-        return require("./kafka_mock");
-    else
-        return require("./kafka");
-};
+const EventEmitter = require('events');
+const ServiceMock = require('./service-mock');
+
+class PeripheralMock extends EventEmitter {
+    constructor(carId, readCharacteristicsMock) {
+        super();
+
+        this.id = carId;
+        this.advertisement = {
+            serviceUuids : ["be15beef6186407e83810bd89c4d8df4"]
+        };
+        this.services = [ new ServiceMock(readCharacteristicsMock) ];
+    }
+
+    connect(callback) {
+        console.log("Mock connect");
+        if(callback !== undefined)
+            callback();
+    }
+
+    disconnect() {
+        console.log("Mock disconnect");
+    }
+
+    discoverServices(filter, callback) {
+        console.log("Mock discover services");
+
+        if(callback !== undefined)
+            callback(undefined, this.services);
+    }
+}
+
+module.exports = PeripheralMock;

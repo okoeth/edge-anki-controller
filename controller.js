@@ -19,12 +19,12 @@
 
 var config = require('./config-wrapper.js')();
 var async = require('async');
-var noble_factory = require('./noble/noble_factory');
+var noble_factory = require('./noble/noble-factory');
 var noble = undefined;
 var readline = require('readline');
 var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
-var kafka_factory = require('./kafka/kafka_factory');
+var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
 
 var readCharacteristic;

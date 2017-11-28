@@ -18,10 +18,9 @@
 // DEALINGS IN THE SOFTWARE.
 
 const EventEmitter = require('events');
-const TrackConfiguration = require('../anki/track_configuration');
+const TrackConfiguration = require('../anki/track-configuration');
 
 class CarMock {
-
 
     constructor(readCaracteristicsMock) {
         this.readCaracteristicsMock = readCaracteristicsMock;
@@ -47,7 +46,7 @@ class CarMock {
 
     sendLocalizationPositionUpdate() {
         var tile = this.trackConfiguration[this.trackTileIndex];
-        this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.real_tile_id));
+        this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId));
 
         this.trackTileIndex++;
         if(this.trackTileIndex >= this.trackConfiguration.length-1) {

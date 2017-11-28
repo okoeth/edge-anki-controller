@@ -17,18 +17,19 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-var carMock;
+const EventEmitter = require('events');
+const WriteCharacteristic = require('./write-characteristics-mock');
 
-module.exports.create = function(type, carId) {
-    if(type === "mock") {
-        //Set up all mock dependencies. The general data producer is the car mock
-        var NobleMock = require('./noble_mock');
-        var ReadCharacteristic = require('./read_characteristics_mock');
-        var CarMock = require('./car_mock');
-        var readCharacteristicMock = new  ReadCharacteristic();
-        carMock = new CarMock(readCharacteristicMock);
-        return new NobleMock(carId, readCharacteristicMock);
+class ServiceMock extends EventEmitter {
+    constructor(readCharacteristicsMock) {
+        super();
+        this.characteristics = [ readCharacteristicsMock, new WriteCharacteristic()];
     }
-    else
-        return require('noble');
-};
+
+    discoverCharacteristics(filter, callback) {
+        if(callback !== undefined)
+            callback(undefined, this.characteristics)
+    }
+}
+
+module.exports = ServiceMock;

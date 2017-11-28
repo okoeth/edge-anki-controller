@@ -18,7 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 const EventEmitter = require('events');
-const PeripheralMock = require('./peripheral_mock');
+const PeripheralMock = require('./periperhal-mock');
 
 class NobleMock extends EventEmitter {
     constructor(carId, readCharacteristicsMock) {

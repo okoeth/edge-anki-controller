@@ -17,6 +17,9 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 // DEALINGS IN THE SOFTWARE.
 
+var PositionCalculator = require("./anki/tile-position-calculator");
+var ankiPositionCalculator = new PositionCalculator();
+
 module.exports = function() {
   return {
     "handle" : function(data, kafka) {
@@ -58,7 +61,8 @@ module.exports = function() {
 	      // example: <Buffer 10 27 21 28 48 e1 86 c2 02 01 47 00 00 00 02 fa 00>
 	      var desc = 'Localization Position Update Received';
 	      var pieceLocation = data.readUInt8(2);
-	      var pieceId = data.readUInt8(3); // in my starter kit: 
+	      var realPieceId = data.readUInt8(3); // in my starter kit:
+		  var internalPieceId = ankiPositionCalculator.getCarPosition(realPieceId);
 	      // 1 x straight: 36
 	      // 1 x straight: 39
 	      // 1 x straight: 40
@@ -69,12 +73,13 @@ module.exports = function() {
 	      // 1 x start/finish: 34 (long) and 33 (short)
 	      var offset = data.readFloatLE(4);
 	      var speed = data.readUInt16LE(8);
-	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - pieceId: '  + pieceId + ' pieceLocation: ' + pieceLocation);;	     
+	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - realPieceId: '  + realPieceId + ' pieceLocation: ' + pieceLocation);;	     
 				kafka.sendMessage(
 					'{ "status_id"      : "' + messageId + '",'+
 					'  "status_name"    : "' + desc + '",'+
 					'  "piece_location" : '  + pieceLocation + ','+
-					'  "piece_id"       : '  + pieceId + ','+
+					'  "real_piece_id"  : '  + realPieceId + ','+
+                    '  "piece_id"       : '  + internalPieceId + ','+
 					'  "offset"         : '  + offset + ','+
 					'  "speed"          : '  + speed + ' }'
 				);
