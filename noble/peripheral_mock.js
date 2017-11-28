@@ -37,6 +37,12 @@ class PeripheralMock extends EventEmitter {
             callback();
     }
 
+    connect(callback) {
+        console.log("Mock disconnect");
+        if(callback !== undefined)
+            callback();
+    }
+
     discoverServices(filter, callback) {
         console.log("Mock discover services");
 
