@@ -21,10 +21,10 @@ const EventEmitter = require('events');
 const PeripheralMock = require('./peripheral_mock');
 
 class NobleMock extends EventEmitter {
-    constructor(carId) {
+    constructor(carId, readCharacteristicsMock) {
         super();
 
-        this.periphal = new PeripheralMock(carId);
+        this.periphal = new PeripheralMock(carId, readCharacteristicsMock);
     }
 
     startScanning() {

@@ -23,23 +23,14 @@ class ReadCharacteristicsMock extends EventEmitter {
     constructor() {
         super();
         this.uuid = 'be15bee06186407e83810bd89c4d8df4';
-        this.interval = setInterval(this.mockReadFromDevice.bind(this), 5000)
-
-        this.message = new Buffer(4);
-        this.message.writeUInt8(0x01, 0);
-        this.message.writeUInt8(0x17, 1);
-        this.message.writeUInt8(0x01, 2);
-        this.message.writeUInt8(0x01, 3);
     }
 
     notify() {
         console.log("Mock read characteristics notify");
     }
 
-    //TODO: implement read event this.emit
-    mockReadFromDevice() {
-
-        this.emit('read', this.message);
+    mockReadFromDevice(message) {
+        this.emit('read', message);
     }
 }
 

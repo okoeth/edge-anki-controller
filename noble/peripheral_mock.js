@@ -21,14 +21,14 @@ const EventEmitter = require('events');
 const ServiceMock = require('./service_mock');
 
 class PeripheralMock extends EventEmitter {
-    constructor(carId) {
+    constructor(carId, readCharacteristicsMock) {
         super();
 
         this.id = carId;
         this.advertisement = {
             serviceUuids : ["be15beef6186407e83810bd89c4d8df4"]
         };
-        this.services = [ new ServiceMock() ];
+        this.services = [ new ServiceMock(readCharacteristicsMock) ];
     }
 
     connect(callback) {
@@ -37,10 +37,8 @@ class PeripheralMock extends EventEmitter {
             callback();
     }
 
-    connect(callback) {
+    disconnect() {
         console.log("Mock disconnect");
-        if(callback !== undefined)
-            callback();
     }
 
     discoverServices(filter, callback) {

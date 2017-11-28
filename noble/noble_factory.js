@@ -17,10 +17,17 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+var carMock;
+
 module.exports.create = function(type, carId) {
     if(type === "mock") {
+        //Set up all mock dependencies. The general data producer is the car mock
         var NobleMock = require('./noble_mock');
-        return new NobleMock(carId);
+        var ReadCharacteristic = require('./read_characteristics_mock');
+        var CarMock = require('./car_mock');
+        var readCharacteristicMock = new  ReadCharacteristic();
+        carMock = new CarMock(readCharacteristicMock);
+        return new NobleMock(carId, readCharacteristicMock);
     }
     else
         return require('noble');

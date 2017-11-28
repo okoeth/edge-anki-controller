@@ -18,13 +18,12 @@
 // DEALINGS IN THE SOFTWARE.
 
 const EventEmitter = require('events');
-const ReadCharacteristic = require('./read_characteristics_mock');
 const WriteCharacteristic = require('./write_characteristics_mock');
 
 class ServiceMock extends EventEmitter {
-    constructor() {
+    constructor(readCharacteristicsMock) {
         super();
-        this.characteristics = [ new ReadCharacteristic(), new WriteCharacteristic()];
+        this.characteristics = [ readCharacteristicsMock, new WriteCharacteristic()];
     }
 
     discoverCharacteristics(filter, callback) {
