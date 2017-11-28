@@ -17,9 +17,20 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-module.exports.create = function(type) {
-    if(type === "mock")
-        return require("./kafka_mock");
-    else
-        return require("./kafka");
-};
+const EventEmitter = require('events');
+const ReadCharacteristic = require('./read_characteristics_mock');
+const WriteCharacteristic = require('./write_characteristics_mock');
+
+class ServiceMock extends EventEmitter {
+    constructor() {
+        super();
+        this.characteristics = [ new ReadCharacteristic(), new WriteCharacteristic()];
+    }
+
+    discoverCharacteristics(filter, callback) {
+        if(callback !== undefined)
+            callback(undefined, this.characteristics)
+    }
+}
+
+module.exports = ServiceMock;

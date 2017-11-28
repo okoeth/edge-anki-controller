@@ -19,7 +19,8 @@
 
 var config = require('./config-wrapper.js')();
 var async = require('async');
-//var noble = require('noble');
+var noble_factory = require('./noble/noble_factory');
+var noble = undefined;
 var readline = require('readline');
 var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
@@ -31,18 +32,22 @@ var writeCharacteristic;
 var car;
 var lane;
 
-//setup kafka
-if(process.argv.length >= 4) {
-  kafka = kafka_factory.create(process.argv[3]);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 // Read properties and start receiving BLE messages
 config.read(process.argv[2], function(carId, startlane) {
-
   if (!carId) {
     console.log('Define carid in a properties file and pass in the name of the file as argv');
     process.exit(0);
+  }
+
+  //setup kafka
+  if(process.argv.length >= 4) {
+      kafka = kafka_factory.create(process.argv[3]);
+  }
+
+  //setup noble
+  if(process.argv.length >= 5) {
+      noble = noble_factory.create(process.argv[4], carId);
   }
 
   lane = startlane;

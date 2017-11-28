@@ -17,9 +17,11 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-module.exports.create = function(type) {
-    if(type === "mock")
-        return require("./kafka_mock");
+module.exports.create = function(type, carId) {
+    if(type === "mock") {
+        var NobleMock = require('./noble_mock');
+        return new NobleMock(carId);
+    }
     else
-        return require("./kafka");
+        return require('noble');
 };

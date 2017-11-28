@@ -17,9 +17,29 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-module.exports.create = function(type) {
-    if(type === "mock")
-        return require("./kafka_mock");
-    else
-        return require("./kafka");
-};
+const EventEmitter = require('events');
+const PeripheralMock = require('./peripheral_mock');
+
+class NobleMock extends EventEmitter {
+    constructor(carId) {
+        super();
+
+        this.periphal = new PeripheralMock(carId);
+    }
+
+    startScanning() {
+        console.log("Noble mock start scanning");
+        this.interval = setInterval(this.mockDeviceDiscovered.bind(this), 1000)
+    }
+
+    stopScanning() {
+        console.log("Noble mock stop scanning");
+        clearInterval(this.interval);
+    }
+
+    mockDeviceDiscovered() {
+        this.emit('discover', this.periphal);
+    }
+}
+
+module.exports = NobleMock
