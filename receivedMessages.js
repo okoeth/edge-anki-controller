@@ -19,7 +19,7 @@
 
 module.exports = function() {
   return {
-    "handle" : function(data, kafkaProducer) {    
+    "handle" : function(data, kafka) {
 
 	    var messageId = data.readUInt8(1);
 	    var date = new Date();
@@ -28,10 +28,8 @@ module.exports = function() {
 	      // example: <Buffer 01 17>
 	      var desc = 'Ping Response Received';
 				//console.log('Message: ' + messageId, data, desc);
-				sendStatus(kafkaProducer, 
-					'{ "status_id"   : "' + messageId + '",'+
-					'  "status_name" : "' + desc +'" }'
-				);
+				kafka.sendMessage('{ "status_id"   : "' + messageId + '",'+
+                    '  "status_name" : "' + desc +'" }');
 	    }
 
 	    else if (messageId == '25') {
@@ -39,11 +37,9 @@ module.exports = function() {
 	      var desc = 'Version Received';
 	      var version = data.readUInt16LE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
-				sendStatus(kafkaProducer, 
-					'{ "status_id"   : "' + messageId + '",'+
-					'  "status_name" : "' + desc + '",'+
-					'  "version"     : '  + version + ' }'
-				);
+			kafka.sendMessage('{ "status_id"   : "' + messageId + '",'+
+                '  "status_name" : "' + desc + '",'+
+                '  "version"     : '  + version + ' }');
 	    }
 
 	    else if (messageId == '27') {
@@ -51,7 +47,7 @@ module.exports = function() {
 	      var desc = 'Battery Level Received';
 	      var level = data.readUInt16LE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - level: ' + level);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "level"       : '  + level + ' }'
@@ -74,7 +70,7 @@ module.exports = function() {
 	      var offset = data.readFloatLE(4);
 	      var speed = data.readUInt16LE(8);
 	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - pieceId: '  + pieceId + ' pieceLocation: ' + pieceLocation);;	     
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"      : "' + messageId + '",'+
 					'  "status_name"    : "' + desc + '",'+
 					'  "piece_location" : '  + pieceLocation + ','+
@@ -89,7 +85,7 @@ module.exports = function() {
 	      var desc = 'Localization Transition Update Received';
 				var offset = data.readFloatLE(4);
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "offset"      : '  + offset + ' }'
@@ -107,7 +103,7 @@ module.exports = function() {
 				var desc = 'Offset from Road Center Update Received';
 				var offset = data.readFloatLE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "status_name" : "' + desc +'" }'
 				);
@@ -128,7 +124,7 @@ module.exports = function() {
 	      var desc = 'Changed Offset (not documented)';
 				var offset = data.readFloatLE(2);
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "offset"      : '  + offset + ' }'
@@ -161,15 +157,3 @@ module.exports = function() {
 		}
   };
 };
-
-function sendStatus(message, kafkaProducer) {
-	if (kafkaProducer!=null) {
-		kafkaProducer.send([{ topic: 'Status', messages: message, partition: 0 }], 
-			function (err, data) {
-				console.log(data);
-			}
-		);
-	} else {
-		console.log(message);		
-	}
-}

@@ -35,6 +35,6 @@ noble.on('stateChange', function(state) {
 noble.on('discover', function(peripheral) {
   var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
   if(serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
-    console.log('Car discovered. ID: ' + peripheral.id); 
+    console.log('Car discovered. ID: ' + peripheral.id);
   }
 });
