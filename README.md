@@ -35,7 +35,11 @@ export KAFKA_EDGE_SERVER=v.x.y.z
 export KAFKA_CLOUD_SERVER=v.x.y.z
 ```
 
-For running Kafka in Doicker see TODO
+For running Kafka in Docker see TODO
+
+### Configuration of Anki track
+
+The controller reads the anki track configuration from Github (https://github.com/cloudwan/edge-anki-config). This configuration is used to translate the tile IDs from the Anki IDs (where duplicates can occur) to our unique internal IDs.
 
 ## Running locally
 The service can be started locally by running
@@ -49,7 +53,16 @@ kafkacat -P -b 127.0.0.1:9092 -t Command
 kafkacat -C -b 127.0.0.1:9092 -t Status
 ```
 
+## Running mocked
+
+The service can be used in a mocked way (for Kafka and noble (bluetooth)). So it is possible to run it without a bluetooth dongle and without having Kafka installed. The first parameter is the mock for Kafka, the second is the mock for bluetooth.
+
+`node controller.js <config-filename> "mock" "mock"`
+
+When running in mocked mode, the service will read the configuration file from Github (https://github.com/cloudwan/edge-anki-config) and send dummy position data of the track from the configuration file.
+
 ## References
+
 * [node](https://nodejs.org/en/download/)
 * [npm](https://docs.npmjs.com/getting-started/installing-node)
 * [git](https://git-scm.com/downloads)
