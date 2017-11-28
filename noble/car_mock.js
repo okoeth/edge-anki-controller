@@ -21,9 +21,14 @@ const EventEmitter = require('events');
 const TrackConfiguration = require('../anki/track_configuration');
 
 class CarMock {
+
+
     constructor(readCaracteristicsMock) {
         this.readCaracteristicsMock = readCaracteristicsMock;
-        var trackConfig = new TrackConfiguration().getTrackConfig(this.setTrackConfiguration);
+        this.trackConfiguration = undefined;
+        this.trackTileIndex = 0;
+
+        new TrackConfiguration().getTrackConfig(this.setTrackConfiguration.bind(this));
     }
 
     setTrackConfiguration(trackConfiguration) {
@@ -41,11 +46,23 @@ class CarMock {
     }
 
     sendLocalizationPositionUpdate() {
+        var tile = this.trackConfiguration[this.trackTileIndex];
+        this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.real_tile_id));
+
+        this.trackTileIndex++;
+        if(this.trackTileIndex >= this.trackConfiguration.length-1) {
+            this.trackTileIndex = 0;
+        }
+    }
+
+    createPositionMessage(tileId) {
         var localizationMessage = new Buffer(17);
         localizationMessage.writeUInt8(0x10, 0);
         localizationMessage.writeUInt8(0x27, 1);
         localizationMessage.writeUInt8(0x21, 2);
-        localizationMessage.writeUInt8(0x28, 3);
+        //convert int to hex
+        var hexValue = tileId.toString(16);
+        localizationMessage.writeUInt8("0x" + hexValue, 3);
         localizationMessage.writeUInt8(0x48, 4);
         localizationMessage.writeUInt8(0xe1, 5);
         localizationMessage.writeUInt8(0x86, 6);
@@ -59,7 +76,7 @@ class CarMock {
         localizationMessage.writeUInt8(0x02, 14);
         localizationMessage.writeUInt8(0xfa, 15);
         localizationMessage.writeUInt8(0x00, 16);
-        this.readCaracteristicsMock.mockReadFromDevice(localizationMessage);
+        return localizationMessage;
     }
 }
 

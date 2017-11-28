@@ -31,10 +31,10 @@ class TrackConfiguration {
 
     getTrackConfig(callback) {
         if(!this.trackConfiguration) {
-            request(this.github_config_url, function (error, response, body) {
+            request({ url: this.github_config_url, json: true}, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     console.log("Imported track configuration successfully");
-                    this.trackConfiguration = JSON.parse(body);
+                    this.trackConfiguration = body;
 
                     if(callback !== undefined)
                         callback(this.trackConfiguration)
