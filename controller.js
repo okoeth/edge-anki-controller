@@ -19,37 +19,19 @@
 
 var config = require('./config-wrapper.js')();
 var async = require('async');
-var noble = require('noble');
+var noble_factory = require('./noble/noble-factory');
+var noble = undefined;
 var readline = require('readline');
 var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
-var kafka = require('kafka-node');
+var kafka_factory = require('./kafka/kafka-factory');
+var kafka = undefined;
 
 var readCharacteristic;
 var writeCharacteristic;
 var car;
 var lane;
-var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
-var kafkaCloudServer = process.env.KAFKA_CLOUD_SERVER;
 
-if (kafkaEdgeServer==null){
-	console.log('Using 127.0.0.1 as default Kafka edge server.');
-	kafkaEdgeServer='127.0.0.1'
-}
-
-if (kafkaCloudServer==null){
-	console.log('Using 127.0.0.1 as default Kafka cloud server.');
-	kafkaCloudServer='127.0.0.1'
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Set-up Kafak client, producer, and consumer
-var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
-
-var kafkaProducer = null;
-var kafkaConsumer = null;
-
-////////////////////////////////////////////////////////////////////////////////
 // Read properties and start receiving BLE messages
 config.read(process.argv[2], function(carNo, carId, startlane) {
 	// Read properties
@@ -57,48 +39,23 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 		console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
 		process.exit(1);
 	}
-
 	if (!carId) {
 		console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
 		process.exit(1);
 	}
 
-	lane = startlane;
+  //setup kafka
+  if(process.argv.length >= 4) {
+      kafka = kafka_factory.create(process.argv[3], carNo);
+  }
 
-	// Connect to Kafka Procducer
-	kafkaProducer = new kafka.Producer(kafkaClient);
-	
-	kafkaProducer.on('ready', function () {
-		console.log('Kafka producer is ready.');
-	});
-	
-	kafkaProducer.on('error', function (err) {
-		console.log('Error in Kafka producer: '+err);
-	});
-	
-	console.log('INFO: Connection Kafka Consumer on Topic'+carNo);
-	kafkaConsumer = new kafka.Consumer(
-		kafkaClient,
-		[
-			{ topic: 'Command'+carNo, partition: 0 } 
-		],
-		{
-			autoCommit: true
-		}
-	);
-	  
-	kafkaConsumer.on('message', function (message) {
-		console.log('INFO: Received: ', message);
-		invokeCommand(message.value);
-	});
-	
-	kafkaConsumer.on('error', function (err) {
-		console.log('ERROR: Error in Kafka consumer: '+err);
-	});
-	
-	kafkaConsumer.on('offsetOutOfRange', function (err) {
-		console.log('ERROR: Error offsetOutOfRange in Kafka consumer: '+err);
-	});
+  //setup noble
+  if(process.argv.length >= 5) {
+      noble = noble_factory.create(process.argv[4], carId);
+  }
+
+  lane = startlane;
+
 		  
 	console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
 	noble.startScanning();
@@ -121,68 +78,60 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 		}
 	});
 
-	////////////////////////////////////////////////////////////////////////////////
 	// Handle connection to car
 	function setUp(peripheral) {
-		
-		////////////////////////////////////////////////////////////////////////////////
 		// Handle disconnect
 		peripheral.on('disconnect', function() {
 			console.log('Car has been disconnected');
 			process.exit(0);
 		});
 
-		////////////////////////////////////////////////////////////////////////////////
 		// Handle connect
 		peripheral.connect(function(error) {
-
-			////////////////////////////////////////////////////////////////////////////////
 			// Handle services (there is only one service)
 			peripheral.discoverServices([], function(error, services) {
 				var service = services[0];
-				
-				////////////////////////////////////////////////////////////////////////////////
+
 				// Handle characteristics (iterate of all characteristics provided)
 				service.discoverCharacteristics([], function(error, characteristics) {
 					var characteristicIndex = 0;
 
-					async.whilst(
+				  	async.whilst(
 						// Whilst condition
 						function () {
-							return (characteristicIndex < characteristics.length);
+					  		return (characteristicIndex < characteristics.length);
 						},
 						// Whilst body
 						function(callback) {
-							var characteristic = characteristics[characteristicIndex];
-							async.series([
-								// Step 1: Handle characteristic
-								function(callback) {
-									// Read characteristic => the beef
-									if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
-										readCharacteristic = characteristic;
-										readCharacteristic.notify(true, function(err) {});
-										characteristic.on('read', function(data, isNotification) {
-											console.log('INFO: Data received which will be handled: ', data);
-											receivedMessages.handle(data, carNo, kafkaProducer);
-										});
-									}
-									// Write characteristic => ignore
-									if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {                        
-										writeCharacteristic = characteristic;
-										init(startlane); 
-										characteristic.on('read', function(data, isNotification) {
-											console.log('INFO: Data received which will be ignored - writeCharacteristic', data);
-										});                          
-									}
-
-									callback();
-								},
-								// Step 2: Increase counter / index
-								function() {
-									characteristicIndex++;
-									callback();
-								}
-							]);
+						  var characteristic = characteristics[characteristicIndex];
+						  async.series([
+							// Step 1: Handle characteristic
+							function(callback) {
+							  // Read characteristic => the beef
+							  if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
+								readCharacteristic = characteristic;
+								readCharacteristic.notify(true, function(err) {});
+								characteristic.on('read', function(data, isNotification) {
+								  console.log('INFO: Data received which will be handled: ', data)
+								  receivedMessages.handle(data, carNo, kafka);
+								});
+							  }
+							  // Write characteristic => ignore
+							  if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
+								writeCharacteristic = characteristic;
+								init(startlane);
+								characteristic.on('read', function(data, isNotification) {
+								  console.log('Data received which will be ignored - writeCharacteristic', data);
+								});
+							  }
+							  callback();
+							},
+							// Step 2: Increase counter / index
+							function() {
+								characteristicIndex++;
+								callback();
+							}
+						  ]);
 						},
 						// Whilst error handler
 						function(error) {
@@ -272,7 +221,7 @@ cli.on('line', function (cmd) {
 	else if (cmd == 'sim') {
 		simulated = '{ "status_id" : "25", "status_name" : "Version", "version" : 42 }'
 		console.log("Simulate: "+simulated);
-		kafkaProducer.send([{ topic: 'Status', messages: simulated, partition: 0 }], 
+		kafkaProducer.sendMessage([{ topic: 'Status', messages: simulated, partition: 0 }],
 			function (err, data) {
 				console.log(data);
 			});

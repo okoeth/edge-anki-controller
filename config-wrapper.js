@@ -22,24 +22,30 @@ var properties = require('properties');
 ////////////////////////////////////////////////////////////////////////////////
 // Read configuration file
 module.exports = function() {
-  return {
-    "read" : function(propertiesFileName, callback) {
-      if (!propertiesFileName) {
-        console.error('Provide configuration filename as parameter, e.g. node controller.js config-car1.properties');
-        process.exit(1);
-      }
-      properties.parse('./' + propertiesFileName, {path: true}, function(err, cfg) {
-        if (err) {
-          console.error('Error parsing the configuration file - see config-sample.properties for an example');
-          process.exit(1);
-		    }
-        if (!cfg.carid) {
-          console.error('Error parsing the configuration file - see config-sample.properties for an example');
+    return {
+      "read" : function(propertiesFileName, callback) {
+        if (!propertiesFileName) {
+          console.error('Provide configuration filename as parameter, e.g. node controller.js config-car1.properties');
           process.exit(1);
         }
-        console.log('Configuration read from '+propertiesFileName+': ', cfg)
-        callback(cfg.carno, cfg.carid, cfg.startlane);
-      });	
-	  }
-  };
+        properties.parse('./' + propertiesFileName, {path: true}, function(err, cfg) {
+          if (err) {
+            console.error('Error parsing the configuration file - see config-sample.properties for an example');
+            process.exit(1);
+          }
+          if (!cfg.carid) {
+            console.error('Error parsing the configuration file - see config-sample.properties for an example');
+            process.exit(1);
+          }
+          if (!cfg.carno) {
+            console.error('Error parsing the configuration file - see config-sample.properties for an example');
+            process.exit(1);
+          }
+          console.log('Configuration read from '+propertiesFileName+': ', cfg);
+
+          if(callback !== undefined)
+              callback(cfg.carno, cfg.carid, cfg.startlane);
+        });
+    }
+  }
 };

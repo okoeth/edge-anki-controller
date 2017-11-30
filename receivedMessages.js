@@ -17,43 +17,36 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
 // DEALINGS IN THE SOFTWARE.
 
+var MessageNames = require("./anki/message-names");
+var PositionCalculator = require("./anki/tile-position-calculator");
+var ankiPositionCalculator = new PositionCalculator();
+
 module.exports = function() {
   return {
     "handle" : function(data, carNo, kafkaProducer) {    
-
 	    var messageId = data.readUInt8(1);
 	    var date = new Date();
 
 	    if (messageId == '23') {
 	      // example: <Buffer 01 17>
-	      var desc = 'Ping Response Received';
+	      var desc = MessageNames.PING;
 				//console.log('Message: ' + messageId, data, desc);
-				sendStatus(kafkaProducer, 
-					'{ "status_id"   : "' + messageId + '",'+
-					'  "car_no"      : "' + carNo + '",'+
-					'  "status_name" : "' + desc +'" }'
-				);
-	    }
+				);	    }
 
 	    else if (messageId == '25') {
 	      // example: <Buffer 05 19 6e 26 00 00>
-	      var desc = 'Version Received';
+	      var desc = MessageNames.VERSION;
 	      var version = data.readUInt16LE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
-				sendStatus(kafkaProducer, 
-					'{ "status_id"   : "' + messageId + '",'+
-					'  "car_no"      : "' + carNo + '",'+
-					'  "status_name" : "' + desc + '",'+
-					'  "version"     : '  + version + ' }'
-				);
-	    }
+					   "car_no"      : "' + carNo + #",' +
+				);	    }
 
 	    else if (messageId == '27') {
 	      // example: <Buffer 03 1b 50 0f>
-	      var desc = 'Battery Level Received';
+	      var desc = MessageNames.BATTERY_LEVEL;
 	      var level = data.readUInt16LE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - level: ' + level);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
@@ -63,9 +56,10 @@ module.exports = function() {
 
 	    else if (messageId == '39') { 
 	      // example: <Buffer 10 27 21 28 48 e1 86 c2 02 01 47 00 00 00 02 fa 00>
-	      var desc = 'Localization Position Update Received';
+	      var desc = MessageNames.POSITION_UPDATE;
 	      var pieceLocation = data.readUInt8(2);
-	      var pieceId = data.readUInt8(3); // in my starter kit: 
+	      var realPieceId = data.readUInt8(3); // in my starter kit:
+		  var internalPieceId = ankiPositionCalculator.getCarPosition(realPieceId);
 	      // 1 x straight: 36
 	      // 1 x straight: 39
 	      // 1 x straight: 40
@@ -76,13 +70,14 @@ module.exports = function() {
 	      // 1 x start/finish: 34 (long) and 33 (short)
 	      var offset = data.readFloatLE(4);
 	      var speed = data.readUInt16LE(8);
-	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - pieceId: '  + pieceId + ' pieceLocation: ' + pieceLocation);;	     
-				sendStatus(kafkaProducer, 
+	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - realPieceId: '  + realPieceId + ' pieceLocation: ' + pieceLocation);;	     
+				kafka.sendMessage(
 					'{ "status_id"      : "' + messageId + '",'+
 					'  "car_no"         : "' + carNo + '",'+
 					'  "status_name"    : "' + desc + '",'+
 					'  "piece_location" : '  + pieceLocation + ','+
-					'  "piece_id"       : '  + pieceId + ','+
+					'  "real_piece_id"  : '  + realPieceId + ','+
+                    '  "piece_id"       : '  + internalPieceId + ','+
 					'  "offset"         : '  + offset + ','+
 					'  "speed"          : '  + speed + ' }'
 				);
@@ -90,10 +85,10 @@ module.exports = function() {
 
 	    else if (messageId == '41') { 
 	      // example: <Buffer 12 29 00 00 02 2b 55 c2 00 ff 81 46 00 00 00 00 00 25 32>
-	      var desc = 'Localization Transition Update Received';
+	      var desc = MessageNames.TRANSITION_UPDATE;
 				var offset = data.readFloatLE(4);
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
@@ -103,16 +98,16 @@ module.exports = function() {
 
 	    else if (messageId == '43') { 
 		  	// example: <Buffer 01 2b>
-	      var desc = 'Vehicle Delocalized Received';
+	      var desc = MessageNames.VEHICLE_DELOCALIZED;
 	      console.log('Message: ' + messageId, data, desc);
 	    }
 
 	    else if (messageId == '45') { 
 	      // example: <Buffer 06 2d 00 c8 75 3d 03>
-				var desc = 'Offset from Road Center Update Received';
+				var desc = MessageNames.OFFSET_CENTER;
 				var offset = data.readFloatLE(2);
 	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc +'" }'
@@ -131,10 +126,10 @@ module.exports = function() {
 
 	    else if (messageId == '65') {
 	      // example: <Buffer 0e 41 9a 99 7f 42 9a 99 7f 42 00 00 00 02 81>
-	      var desc = 'Changed Offset (not documented)';
+	      var desc = MessageNames.OFFSET_CHANGED;
 				var offset = data.readFloatLE(2);
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-				sendStatus(kafkaProducer, 
+				kafka.sendMessage(
 					'{ "status_id"   : "' + messageId + '",'+
 					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
@@ -168,16 +163,4 @@ module.exports = function() {
 		}
   };
 };
-
-function sendStatus(kafkaProducer, message) {
-	console.log('INFO: Send status: ', message);
-	if (kafkaProducer!=null) {
-		kafkaProducer.send([{ topic: 'Status', messages: message, partition: 0 }], 
-			function (err, data) {
-				console.log(data);
-			}
-		);
-	} else {
-		console.log(message);		
-	}
 }
