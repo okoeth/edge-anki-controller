@@ -19,7 +19,7 @@
 
 module.exports = function() {
   return {
-    "handle" : function(data, kafkaProducer) {    
+    "handle" : function(data, carNo, kafkaProducer) {    
 
 	    var messageId = data.readUInt8(1);
 	    var date = new Date();
@@ -30,6 +30,7 @@ module.exports = function() {
 				//console.log('Message: ' + messageId, data, desc);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc +'" }'
 				);
 	    }
@@ -41,6 +42,7 @@ module.exports = function() {
 	      //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "version"     : '  + version + ' }'
 				);
@@ -53,6 +55,7 @@ module.exports = function() {
 	      //console.log('Message: ' + messageId, data, desc + ' - level: ' + level);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "level"       : '  + level + ' }'
 				);
@@ -76,6 +79,7 @@ module.exports = function() {
 	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - pieceId: '  + pieceId + ' pieceLocation: ' + pieceLocation);;	     
 				sendStatus(kafkaProducer, 
 					'{ "status_id"      : "' + messageId + '",'+
+					'  "car_no"         : "' + carNo + '",'+
 					'  "status_name"    : "' + desc + '",'+
 					'  "piece_location" : '  + pieceLocation + ','+
 					'  "piece_id"       : '  + pieceId + ','+
@@ -91,6 +95,7 @@ module.exports = function() {
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "offset"      : '  + offset + ' }'
 				);
@@ -109,6 +114,7 @@ module.exports = function() {
 	      //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc +'" }'
 				);
 	    }
@@ -130,6 +136,7 @@ module.exports = function() {
 				//console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
 				sendStatus(kafkaProducer, 
 					'{ "status_id"   : "' + messageId + '",'+
+					'  "car_no"      : "' + carNo + '",'+
 					'  "status_name" : "' + desc + '",'+
 					'  "offset"      : '  + offset + ' }'
 				);
