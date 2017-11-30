@@ -34,11 +34,11 @@ module.exports = function() {
             process.exit(1);
           }
           if (!cfg.carid) {
-            console.error('Error parsing the configuration file - see config-sample.properties for an example');
+            console.error('Error parsing car id of the configuration file - see config-sample.properties for an example');
             process.exit(1);
           }
           if (!cfg.carno) {
-            console.error('Error parsing the configuration file - see config-sample.properties for an example');
+            console.error('Error parsing car no of the configuration file - see config-sample.properties for an example');
             process.exit(1);
           }
           console.log('Configuration read from '+propertiesFileName+': ', cfg);

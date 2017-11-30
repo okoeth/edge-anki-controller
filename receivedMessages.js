@@ -23,24 +23,29 @@ var ankiPositionCalculator = new PositionCalculator();
 
 module.exports = function() {
   return {
-    "handle" : function(data, carNo, kafkaProducer) {    
+    "handle" : function(data, carNo, kafka) {
 	    var messageId = data.readUInt8(1);
 	    var date = new Date();
 
 	    if (messageId == '23') {
-	      // example: <Buffer 01 17>
-	      var desc = MessageNames.PING;
-				//console.log('Message: ' + messageId, data, desc);
-				);	    }
-
+            // example: <Buffer 01 17>
+            var desc = MessageNames.PING;
+            //console.log('Message: ' + messageId, data, desc);
+            kafka.sendMessage('' +
+                '{ "status_id"   : "' + messageId + '",' +
+                '"status_name" : "' + desc + '" }'
+            );
+        }
 	    else if (messageId == '25') {
-	      // example: <Buffer 05 19 6e 26 00 00>
-	      var desc = MessageNames.VERSION;
-	      var version = data.readUInt16LE(2);
-	      //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
-					   "car_no"      : "' + carNo + #",' +
-				);	    }
-
+            // example: <Buffer 05 19 6e 26 00 00>
+            var desc = MessageNames.VERSION;
+            var version = data.readUInt16LE(2);
+            //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
+            kafka.sendMessage('{ "status_id"   : "' + messageId + '",' +
+                '  "status_name" : "' + desc + '",' +
+                '  "car_no"      : "' + carNo + '",' +
+                '  "version"     : "' + version + '" }');
+        }
 	    else if (messageId == '27') {
 	      // example: <Buffer 03 1b 50 0f>
 	      var desc = MessageNames.BATTERY_LEVEL;
@@ -159,8 +164,7 @@ module.exports = function() {
 
 	    else {
 	      //console.log('Message: ' + messageId, data, 'Unknown');
-	    }  	
-		}
+	    }
+  	}
   };
-};
 }

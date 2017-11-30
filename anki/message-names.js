@@ -29,4 +29,4 @@ const MessageNames = {
 
 }
 
-modules.exports = MessageNames;
+module.exports = MessageNames;
