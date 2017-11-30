@@ -83,18 +83,20 @@ kafkaConsumer.on('offsetOutOfRange', function (err) {
 config.read(process.argv[2], function(carId, startlane) {
 
   if (!carId) {
-    console.log('Define carid in a properties file and pass in the name of the file as argv');
-    process.exit(0);
+    console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
+    process.exit(1);
   }
 
   lane = startlane;
 
+  console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
   noble.startScanning();
   setTimeout(function() {
     noble.stopScanning();
   }, 2000);
 
   noble.on('discover', function(peripheral) {
+    console.log('INFO: Peripheral discovered with ID: ' + peripheral.id); 
     if (peripheral.id === carId) {
       noble.stopScanning();
 
@@ -149,6 +151,7 @@ config.read(process.argv[2], function(carId, startlane) {
                     readCharacteristic = characteristic;
                     readCharacteristic.notify(true, function(err) {});
                     characteristic.on('read', function(data, isNotification) {
+                      console.log('INFO: Data received which will be handled: ', data);
                       receivedMessages.handle(data, kafkaProducer);
                     });
                   }
@@ -157,7 +160,7 @@ config.read(process.argv[2], function(carId, startlane) {
                     writeCharacteristic = characteristic;
                     init(startlane); 
                     characteristic.on('read', function(data, isNotification) {
-                      console.log('Data received which will be ignored - writeCharacteristic', data);
+                      console.log('INFO: Data received which will be ignored - writeCharacteristic', data);
                     });                          
                   }
 
@@ -223,26 +226,25 @@ function init(startlane) {
 ////////////////////////////////////////////////////////////////////////////////
 // Send command to car
 function invokeCommand(cmd) {
-  console.log('CMD DIABLED: '+cmd)
-  /*
+  console.log('INFO: Invoke command: '+cmd)
+  
   var message = prepareMessages.format(cmd);
   if (message) {                     
-    console.log("Command: " + cmd, message);
+    console.log("INFO: Command: " + cmd, message);
              
     if (writeCharacteristic) { 
       writeCharacteristic.write(message, false, function(err) {
         if (!err) {
-          console.log('Command sent');
+          console.log('INFO: Command sent');
         }
         else {
-          console.log('Error sending command');
+          console.log('ERROR: Error sending command');
         }
       });
     } else {
-      console.log('Error sending command');
+      console.log('ERROR: Error sending command');
     }
   }
-  */
 }
 
 ////////////////////////////////////////////////////////////////////////////////

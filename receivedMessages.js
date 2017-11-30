@@ -162,7 +162,8 @@ module.exports = function() {
   };
 };
 
-function sendStatus(message, kafkaProducer) {
+function sendStatus(kafkaProducer, message) {
+	console.log('INFO: Send status: ', message);
 	if (kafkaProducer!=null) {
 		kafkaProducer.send([{ topic: 'Status', messages: message, partition: 0 }], 
 			function (err, data) {

@@ -38,6 +38,7 @@ module.exports = function() {
           process.exit(1);
         }
         console.log('Configuration read from '+propertiesFileName+': ', cfg)
+        callback(cfg.carid, cfg.startlane);
       });	
 	  }
   };
