@@ -36,9 +36,9 @@ var car;
 var lane;
 
 // Read properties and start receiving BLE messages
-config.read(process.argv[2], function(carNo, carId, startlane) {
+config.read(process.argv[2], function (carNo, carId, startlane) {
 	// Read properties
-	if (!carNo && isNaN(carNo*1) && carNo > 0 && carNo < 5) {
+	if (!carNo && isNaN(carNo * 1) && carNo > 0 && carNo < 5) {
 		console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
 		process.exit(1);
 	}
@@ -46,38 +46,38 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 		console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
 		process.exit(1);
 	}
-  //setup kafka
-  if(process.argv.length >= 4) {
-      kafka = kafka_factory.create(process.argv[3], carNo, carMessageGateway);
-  } else {
-	  kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
-  }
+	//setup kafka
+	if (process.argv.length >= 4) {
+		kafka = kafka_factory.create(process.argv[3], carNo, carMessageGateway);
+	} else {
+		kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
+	}
 
-  //setup noble
-  if(process.argv.length >= 5) {
-      noble = noble_factory.create(process.argv[4], carId);
-  } else {
-	  noble = noble_factory.create("noble", carId);
-  }
+	//setup noble
+	if (process.argv.length >= 5) {
+		noble = noble_factory.create(process.argv[4], carId);
+	} else {
+		noble = noble_factory.create("noble", carId);
+	}
 
-  lane = startlane;
+	lane = startlane;
 
-		  
+
 	console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
 	noble.startScanning();
-	setTimeout(function() {
+	setTimeout(function () {
 		noble.stopScanning();
 	}, 2000);
 
-	noble.on('discover', function(peripheral) {
-		console.log('INFO: Peripheral discovered with ID: ' + peripheral.id); 
+	noble.on('discover', function (peripheral) {
+		console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
 		if (peripheral.id === carId) {
 			noble.stopScanning();
 
 			var advertisement = peripheral.advertisement;
 			var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
-			if(serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
-				console.log('INFO: Car discovered. ID: ' + peripheral.id); 
+			if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
+				console.log('INFO: Car discovered. ID: ' + peripheral.id);
 				car = peripheral;
 				setUp(car);
 			}
@@ -87,60 +87,74 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 	// Handle connection to car
 	function setUp(peripheral) {
 		// Handle disconnect
-		peripheral.on('disconnect', function() {
-			console.log('Car has been disconnected');
+		peripheral.on('disconnect', function () {
+			console.log('INFO: Car has been disconnected');
 			process.exit(0);
 		});
 
 		// Handle connect
-		peripheral.connect(function(error) {
+		peripheral.connect(function (error) {
+			console.log('INFO: Car has been connected');
+			if (error != null) {
+				console.log('ERROR: Error connection car', error);
+				process.exit(1);
+			}
 			// Handle services (there is only one service)
-			peripheral.discoverServices([], function(error, services) {
+			peripheral.discoverServices([], function (error, services) {
+				console.log('INFO: Discovered services');
+				if (error != null) {
+					console.log('ERROR: Error connection car', error);
+					process.exit(1);
+				}
+				
 				var service = services[0];
 
 				// Handle characteristics (iterate of all characteristics provided)
-				service.discoverCharacteristics([], function(error, characteristics) {
+				service.discoverCharacteristics([], function (error, characteristics) {
 					var characteristicIndex = 0;
 
-				  	async.whilst(
+					async.whilst(
 						// Whilst condition
 						function () {
-					  		return (characteristicIndex < characteristics.length);
+							return (characteristicIndex < characteristics.length);
 						},
 						// Whilst body
-						function(callback) {
-						  var characteristic = characteristics[characteristicIndex];
-						  async.series([
-							// Step 1: Handle characteristic
-							function(callback) {
-							  // Read characteristic => the beef
-							  if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
-								readCharacteristic = characteristic;
-								readCharacteristic.notify(true, function(err) {});
-								characteristic.on('read', function(data, isNotification) {
-								  console.log('INFO: Data received which will be handled: ', data)
-								  receivedMessages.handle(data, carNo, kafka);
-								});
-							  }
-							  // Write characteristic => ignore
-							  if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
-							  	carMessageGateway.setWriteCharacteristics(characteristic);
-								init(startlane);
-								characteristic.on('read', function(data, isNotification) {
-								  console.log('Data received which will be ignored - writeCharacteristic', data);
-								});
-							  }
-							  callback();
-							},
-							// Step 2: Increase counter / index
-							function() {
-								characteristicIndex++;
-								callback();
-							}
-						  ]);
+						function (callback) {
+							console.log('INFO: Next characteristic');
+							var characteristic = characteristics[characteristicIndex];
+							async.series([
+								// Step 1: Handle characteristic
+								function (callback) {
+									if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
+										console.log('INFO: Read characteristic');
+										readCharacteristic = characteristic;
+										readCharacteristic.notify(true, function (err) { });
+										characteristic.on('read', function (data, isNotification) {
+											console.log('INFO: Data received which will be handled: ', data)
+											receivedMessages.handle(data, carNo, kafka);
+										});
+									}
+									// Write characteristic => ignore
+									if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
+										console.log('INFO: Write characteristic', carMessageGateway);
+										carMessageGateway.setWriteCharacteristics(characteristic);
+										writeCharacteristic = characteristic;
+										init(startlane);
+										characteristic.on('read', function (data, isNotification) {
+											console.log('Data received which will be ignored - writeCharacteristic', data);
+										});
+									}
+									callback();
+								},
+								// Step 2: Increase counter / index
+								function () {
+									characteristicIndex++;
+									callback();
+								}
+							]);
 						},
 						// Whilst error handler
-						function(error) {
+						function (error) {
 							console.log('Error processing characteristics from peripheral service');
 						}
 					);
@@ -153,13 +167,14 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 ////////////////////////////////////////////////////////////////////////////////
 // Initialise system
 function init(startlane) {
+	console.log("INFO: Initialise lane");
 	// turn on sdk and set offset
 	var initMessage = new Buffer(4);
 	initMessage.writeUInt8(0x03, 0);
 	initMessage.writeUInt8(0x90, 1);
 	initMessage.writeUInt8(0x01, 2);
 	initMessage.writeUInt8(0x01, 3);
-	writeCharacteristics.write(initMessage, false, function(err) {
+	writeCharacteristic.write(initMessage, false, function (err) {
 		if (!err) {
 			var initialOffset = 0.0;
 			if (startlane) {
@@ -173,7 +188,7 @@ function init(startlane) {
 			initMessage.writeUInt8(0x05, 0);
 			initMessage.writeUInt8(0x2c, 1);
 			initMessage.writeFloatLE(initialOffset, 2);
-			writeCharacteristic.write(initMessage, false, function(err) {
+			writeCharacteristic.write(initMessage, false, function (err) {
 				if (!err) {
 					console.log('Initialization was successful');
 					console.log('Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)');
@@ -181,7 +196,7 @@ function init(startlane) {
 				else {
 					console.log('Initialization error');
 				}
-			});      
+			});
 		}
 		else {
 			console.log('Initialization error');
@@ -199,27 +214,28 @@ var cli = readline.createInterface({
 cli.on('line', function (cmd) {
 	if (cmd == 'help') {
 		console.log(prepareMessages.doc());
-	} 
+	}
 	else if (cmd == 'sim') {
 		simulated = '{ "status_id" : "25", "status_name" : "Version", "version" : 42 }'
-		console.log("Simulate: "+simulated);
-		kafka.sendMessage([{ topic: 'Status', messages: simulated, partition: 0 }],
+		console.log("Simulate: " + simulated);
+		kafka.sendMessage(simulated,
 			function (err, data) {
 				console.log(data);
 			});
-	} 
+	}
 	else {
+		console.log("INFO: Send command from CLI");
 		carMessageGateway.sendCommand(cmd);
-	}                        
+	}
 });
 
 process.stdin.resume();
 
 ////////////////////////////////////////////////////////////////////////////////
 // Graceful exist
-process.on('exit', exitHandler.bind(null,{cleanup:true}));
-process.on('SIGINT', exitHandler.bind(null, {exit:true}));
-process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+process.on('exit', exitHandler.bind(null, { cleanup: true }));
+process.on('SIGINT', exitHandler.bind(null, { exit: true }));
+process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 function exitHandler(options, err) {
 	if (car) car.disconnect();

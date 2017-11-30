@@ -1,0 +1,70 @@
+Using https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json as default configuration repository
+Configuration read from config-car2.properties:  { carno: 2,
+  carid: 'd28ae98b9d254fe8b355e2b63f1e6bd1',
+  startlane: 3 }
+INFO: Using kafka
+Using 127.0.0.1 as default Kafka edge server.
+Using 127.0.0.1 as default Kafka cloud server.
+INFO: Connection Kafka Consumer on Topic Command2
+INFO: Using noble
+INFO: Start scanning for cars (ended after 2sec with timer)
+Kafka producer is ready.
+INFO: Peripheral discovered with ID: d28ae98b9d254fe8b355e2b63f1e6bd1
+INFO: Car discovered. ID: d28ae98b9d254fe8b355e2b63f1e6bd1
+Imported track configuration successfully
+INFO: Peripheral discovered with ID: ab9341168341436f8de5107f22374f11
+INFO: Peripheral discovered with ID: cf51ed3fb1bc4557a9768c49f77851ce
+INFO: Peripheral discovered with ID: 58745a53b80b488eab254f8992d78ae5
+INFO: Peripheral discovered with ID: adf93c91ff4543638bfd905af63a4a36
+INFO: Peripheral discovered with ID: ed23bd610d4e425aa200b527bafb47d8
+INFO: Peripheral discovered with ID: b1f2d212fc304aedad8e74b3c8331e9e
+INFO: Car has been connected
+INFO: Discovered services
+INFO: Next characteristic
+INFO: Write characteristic CarMessageGateway {}
+INFO: Initialise lane
+INFO: Next characteristic
+INFO: Read characteristic
+Error processing characteristics from peripheral service
+Initialization was successful
+Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)
+INFO: Data received which will be handled:  <Buffer 05 3f 01 00 00 01>
+INFO: Data received which will be handled:  <Buffer 0b 86 97 00 1a 08 00 00 0b 10 00 00>
+s 250
+INFO: Send command from CLI
+INFO: Invoke command: s 250
+INFO: Process command: s 250 <Buffer 06 24 fa 00 d4 30 00>
+INFO: Command sent
+INFO: Data received which will be handled:  <Buffer 07 36 fa 00 d4 30 00 00>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 61 00 35 29 0c 08>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 00 00 0b 00 40 33>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 04 00 00 00 3e 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 00 00 00 00 39 36>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 02 00 00 00 3d 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 02 00 00 00 3d 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 01 00 00 00 38 37>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 02 00 00 00 3f 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 06 00 00 00 3e 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 02 00 00 00 36 37>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 03 00 00 00 3e 34>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 99 c2 ff ff 00 00 04 00 00 00 3d 33>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -76.5 }
+e
+INFO: Send command from CLI
+INFO: Invoke command: e
+INFO: Process command: e <Buffer 06 24 00 00 d4 30 00>
+INFO: Command sent
+INFO: Data received which will be handled:  <Buffer 07 36 00 00 d4 30 02 01>
+INFO: Data received which will be handled:  <Buffer 03 4d 01 00>

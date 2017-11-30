@@ -36,10 +36,11 @@ class CarMessageGateway {
     // Send command to car
     sendCommand(command) {
         console.log('INFO: Invoke command: '+ command)
-
+        //console.log('INFO: Preparer: ', prepareMessages)
+        
         var message = prepareMessages.format(command);
         if (message) {
-            console.log("INFO: Command: " + cmd, message);
+            console.log("INFO: Process command: " + command, message);
 
             if (this.writeCharacteristic) {
                 this.writeCharacteristic.write(message, false, function(err) {

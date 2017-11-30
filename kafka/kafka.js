@@ -21,33 +21,38 @@ var kafka = require('kafka-node');
 
 var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
 var kafkaCloudServer = process.env.KAFKA_CLOUD_SERVER;
+var kafkaClient;
 var kafkaProducer;
 var kafkaConsumer;
 var carMessageGateway;
 
 module.exports.sendMessage = function(message) {
+    console.log("INFO: Kafka SendMessage invoked: ", message);
     kafkaProducer.send([{topic: 'Status', messages: message, partition: 0}],
-        function (err, data) {
-            console.log(data);
+        function (err, data) {            
+            if (err!=null) {
+                console.log("ERROR: Error sending message: ", err);
+            }
         }
     );
 }
 
-module.exports.init = function(carNo, carMessageGateway) {
-    if (kafkaEdgeServer==null){
+module.exports.init = function(carNo, newCarMessageGateway) {
+    carMessageGateway = newCarMessageGateway;
+    if (kafkaEdgeServer==null || kafkaEdgeServer==''){
         console.log('Using 127.0.0.1 as default Kafka edge server.');
         kafkaEdgeServer='127.0.0.1'
     }
 
-    if (kafkaCloudServer==null){
+    if (kafkaCloudServer==null || kafkaCloudServer==''){
         console.log('Using 127.0.0.1 as default Kafka cloud server.');
         kafkaCloudServer='127.0.0.1'
     }
 
     ////////////////////////////////////////////////////////////////////////////////
     // Set-up Kafak client, producer, and consumer
-    var kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
-    var kafkaProducer = new kafka.Producer(kafkaClient);
+    kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
+    kafkaProducer = new kafka.Producer(kafkaClient);
 
     kafkaProducer.on('ready', function () {
         console.log('Kafka producer is ready.');
@@ -70,7 +75,7 @@ module.exports.init = function(carNo, carMessageGateway) {
 
     kafkaConsumer.on('message', function (message) {
         console.log('INFO: Received: ', message);
-        carMessageGateway.sendCommand(message.value);
+        //carMessageGateway.sendCommand(message.value);
     });
 
     kafkaConsumer.on('error', function (err) {

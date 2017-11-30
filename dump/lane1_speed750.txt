@@ -1,0 +1,95 @@
+Using https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json as default configuration repository
+Configuration read from config-car2.properties:  { carno: 2,
+  carid: 'd28ae98b9d254fe8b355e2b63f1e6bd1',
+  startlane: 3 }
+INFO: Using kafka
+Using 127.0.0.1 as default Kafka edge server.
+Using 127.0.0.1 as default Kafka cloud server.
+INFO: Connection Kafka Consumer on Topic Command2
+INFO: Using noble
+INFO: Start scanning for cars (ended after 2sec with timer)
+Kafka producer is ready.
+INFO: Peripheral discovered with ID: adf93c91ff4543638bfd905af63a4a36
+Imported track configuration successfully
+INFO: Peripheral discovered with ID: d28ae98b9d254fe8b355e2b63f1e6bd1
+INFO: Car discovered. ID: d28ae98b9d254fe8b355e2b63f1e6bd1
+INFO: Peripheral discovered with ID: 66389a83f0754af6b2422c22cd600358
+INFO: Peripheral discovered with ID: 58745a53b80b488eab254f8992d78ae5
+INFO: Peripheral discovered with ID: 24ca025fcb7149e49413b0fd3b3a4340
+INFO: Peripheral discovered with ID: ab9341168341436f8de5107f22374f11
+INFO: Car has been connected
+INFO: Discovered services
+INFO: Next characteristic
+INFO: Write characteristic CarMessageGateway {}
+INFO: Initialise lane
+INFO: Next characteristic
+INFO: Read characteristic
+Error processing characteristics from peripheral service
+Initialization was successful
+Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)
+INFO: Data received which will be handled:  <Buffer 05 3f 01 00 00 01>
+INFO: Data received which will be handled:  <Buffer 0b 86 8c 00 fc 07 00 00 0b 10 00 00>
+s 750
+INFO: Send command from CLI
+INFO: Invoke command: s 750
+INFO: Process command: s 750 <Buffer 06 24 ee 02 d4 30 00>
+INFO: Command sent
+INFO: Data received which will be handled:  <Buffer 07 36 ee 02 d4 30 00 00>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 7f 00 13 01 3f 3a>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 00 c2 ff ff 00 00 39 00 92 00 34 1f>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -32 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 1e 00 4c 00 28 24>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 10 27 2d 28 00 00 b8 c1 23 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 45,  "real_piece_id"  : 40,  "piece_id"       : 5,  "offset"         : -23,  "speed"          : 803 }
+INFO: Data received which will be handled:  <Buffer 10 27 2e 28 00 00 b8 c1 19 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 46,  "real_piece_id"  : 40,  "piece_id"       : 5,  "offset"         : -23,  "speed"          : 793 }
+INFO: Data received which will be handled:  <Buffer 10 27 2f 28 00 00 b8 c1 06 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 47,  "real_piece_id"  : 40,  "piece_id"       : 5,  "offset"         : -23,  "speed"          : 774 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 06 00 47 00 39 37>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 00 c2 ff ff 00 00 23 00 34 00 31 1f>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -32 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 26 00 53 00 2d 22>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 10 27 2e 27 00 00 b8 c1 0e 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 46,  "real_piece_id"  : 39,  "piece_id"       : ,  "offset"         : -23,  "speed"          : 782 }
+INFO: Data received which will be handled:  <Buffer 10 27 2f 27 00 00 b8 c1 fd 02 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 47,  "real_piece_id"  : 39,  "piece_id"       : ,  "offset"         : -23,  "speed"          : 765 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 0d 00 11 00 3a 37>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 00 c2 ff ff 00 00 23 00 4a 00 34 22>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -32 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 21 00 48 00 2a 22>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 10 27 2e 28 00 00 b8 c1 02 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 46,  "real_piece_id"  : 40,  "piece_id"       : 5,  "offset"         : -23,  "speed"          : 770 }
+INFO: Data received which will be handled:  <Buffer 10 27 2f 28 00 00 b8 c1 ef 02 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 47,  "real_piece_id"  : 40,  "piece_id"       : 5,  "offset"         : -23,  "speed"          : 751 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 0a 00 2e 00 38 38>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 03 4d 00 01>
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 00 c2 ff ff 00 00 1b 00 34 00 2f 20>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -32 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 28 00 5d 00 2d 20>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+eINFO: Data received which will be handled:  <Buffer 10 27 2e 27 00 00 b8 c1 0d 03 07 ff ff 00 00 ee 02>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 46,  "real_piece_id"  : 39,  "piece_id"       : ,  "offset"         : -23,  "speed"          : 781 }
+
+INFO: Send command from CLI
+INFO: Invoke command: e
+INFO: Process command: e <Buffer 06 24 00 00 d4 30 00>
+INFO: Command sent
+INFO: Data received which will be handled:  <Buffer 07 36 00 00 d4 30 09 03>
+INFO: Data received which will be handled:  <Buffer 10 27 2f 27 00 00 b8 c1 9d 02 07 ff ff 00 00 00 00>
+INFO: Kafka SendMessage invoked:  { "status_id"      : "39",  "car_no"         : "2",  "status_name"    : "POSITION_UPDATE",  "piece_location" : 47,  "real_piece_id"  : 39,  "piece_id"       : ,  "offset"         : -23,  "speed"          : 669 }
+INFO: Data received which will be handled:  <Buffer 11 29 00 00 00 00 b8 c1 ff ff 00 00 0a 00 02 12 36 35>
+INFO: Kafka SendMessage invoked:  { "status_id"   : "41",  "car_no"      : "2",  "status_name" : "TRANSITION_UPDATE",  "offset"      : -23 }
+INFO: Data received which will be handled:  <Buffer 03 4d 01 00>
