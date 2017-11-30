@@ -23,6 +23,7 @@ var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
 var kafkaCloudServer = process.env.KAFKA_CLOUD_SERVER;
 var kafkaProducer;
 var kafkaConsumer;
+var carMessageGateway;
 
 module.exports.sendMessage = function(message) {
     kafkaProducer.send([{topic: 'Status', messages: message, partition: 0}],
@@ -32,7 +33,7 @@ module.exports.sendMessage = function(message) {
     );
 }
 
-module.exports.init = function(carNo) {
+module.exports.init = function(carNo, carMessageGateway) {
     if (kafkaEdgeServer==null){
         console.log('Using 127.0.0.1 as default Kafka edge server.');
         kafkaEdgeServer='127.0.0.1'
@@ -69,7 +70,7 @@ module.exports.init = function(carNo) {
 
     kafkaConsumer.on('message', function (message) {
         console.log('INFO: Received: ', message);
-        invokeCommand(message.value);
+        carMessageGateway.sendCommand(message.value);
     });
 
     kafkaConsumer.on('error', function (err) {

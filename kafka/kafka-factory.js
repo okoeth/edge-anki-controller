@@ -17,15 +17,17 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-module.exports.create = function(type, carNo) {
+module.exports.create = function(type, carNo, carMessageGateway) {
     if(type === "mock") {
+        console.log("INFO: Using kafka mocked" );
         var kafka = require("./kafka-mock");
         kafka.init(carNo)
         return kafka;
     }
     else {
+        console.log("INFO: Using kafka");
         var kafka = require("./kafka");
-        kafka.init(carNo)
+        kafka.init(carNo, carMessageGateway)
         return kafka
     }
 };

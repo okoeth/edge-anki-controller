@@ -21,6 +21,8 @@ var config = require('./config-wrapper.js')();
 var async = require('async');
 var noble_factory = require('./noble/noble-factory');
 var noble = undefined;
+var CarMessageGateway = require('./anki/car-message-gateway');
+var carMessageGateway = new CarMessageGateway();
 //var noble = require('noble');
 var readline = require('readline');
 var receivedMessages = require('./receivedMessages.js')();
@@ -46,12 +48,16 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 	}
   //setup kafka
   if(process.argv.length >= 4) {
-      kafka = kafka_factory.create(process.argv[3], carNo);
+      kafka = kafka_factory.create(process.argv[3], carNo, carMessageGateway);
+  } else {
+	  kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
   }
 
   //setup noble
   if(process.argv.length >= 5) {
       noble = noble_factory.create(process.argv[4], carId);
+  } else {
+	  noble = noble_factory.create("noble", carId);
   }
 
   lane = startlane;
@@ -118,7 +124,7 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 							  }
 							  // Write characteristic => ignore
 							  if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
-								writeCharacteristic = characteristic;
+							  	carMessageGateway.setWriteCharacteristics(characteristic);
 								init(startlane);
 								characteristic.on('read', function(data, isNotification) {
 								  console.log('Data received which will be ignored - writeCharacteristic', data);
@@ -153,7 +159,7 @@ function init(startlane) {
 	initMessage.writeUInt8(0x90, 1);
 	initMessage.writeUInt8(0x01, 2);
 	initMessage.writeUInt8(0x01, 3);
-	writeCharacteristic.write(initMessage, false, function(err) {
+	writeCharacteristics.write(initMessage, false, function(err) {
 		if (!err) {
 			var initialOffset = 0.0;
 			if (startlane) {
@@ -184,30 +190,6 @@ function init(startlane) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Send command to car
-function invokeCommand(cmd) {
-	console.log('INFO: Invoke command: '+cmd)
-	
-	var message = prepareMessages.format(cmd);
-	if (message) {                     
-		console.log("INFO: Command: " + cmd, message);
-						 
-		if (writeCharacteristic) { 
-			writeCharacteristic.write(message, false, function(err) {
-				if (!err) {
-					console.log('INFO: Command sent');
-				}
-				else {
-					console.log('ERROR: Error sending command');
-				}
-			});
-		} else {
-			console.log('ERROR: Error sending command');
-		}
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
 // Manual input processing
 var cli = readline.createInterface({
 	input: process.stdin,
@@ -227,7 +209,7 @@ cli.on('line', function (cmd) {
 			});
 	} 
 	else {
-		invokeCommand(cmd);
+		carMessageGateway.sendCommand(cmd);
 	}                        
 });
 
