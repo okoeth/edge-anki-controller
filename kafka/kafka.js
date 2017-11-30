@@ -56,7 +56,7 @@ module.exports.init = function(carNo) {
         console.log('Error in Kafka producer: '+err);
     });
 
-    console.log('INFO: Connection Kafka Consumer on Topic'+carNo);
+    console.log('INFO: Connection Kafka Consumer on Topic Command'+carNo);
     kafkaConsumer = new kafka.Consumer(
         kafkaClient,
         [

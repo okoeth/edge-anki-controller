@@ -21,6 +21,7 @@ var config = require('./config-wrapper.js')();
 var async = require('async');
 var noble_factory = require('./noble/noble-factory');
 var noble = undefined;
+//var noble = require('noble');
 var readline = require('readline');
 var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
@@ -43,7 +44,6 @@ config.read(process.argv[2], function(carNo, carId, startlane) {
 		console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
 		process.exit(1);
 	}
-
   //setup kafka
   if(process.argv.length >= 4) {
       kafka = kafka_factory.create(process.argv[3], carNo);
@@ -221,7 +221,7 @@ cli.on('line', function (cmd) {
 	else if (cmd == 'sim') {
 		simulated = '{ "status_id" : "25", "status_name" : "Version", "version" : 42 }'
 		console.log("Simulate: "+simulated);
-		kafkaProducer.sendMessage([{ topic: 'Status', messages: simulated, partition: 0 }],
+		kafka.sendMessage([{ topic: 'Status', messages: simulated, partition: 0 }],
 			function (err, data) {
 				console.log(data);
 			});

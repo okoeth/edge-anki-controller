@@ -19,8 +19,11 @@
 
 var carMock;
 
+var noble = require('noble');
+
 module.exports.create = function(type, carId) {
     if(type === "mock") {
+        console.log('INFO: Using noble mock');
         //Set up all mock dependencies. The general data producer is the car mock
         var NobleMock = require('./noble-mock');
         var ReadCharacteristic = require('./read-characteristics-mock');
@@ -29,6 +32,8 @@ module.exports.create = function(type, carId) {
         carMock = new CarMock(readCharacteristicMock);
         return new NobleMock(carId, readCharacteristicMock);
     }
-    else
-        return require('noble');
+    else {
+        console.log('INFO: Using noble');
+        return noble;
+    }
 };
