@@ -27,6 +27,9 @@ carid=adf93c91ff4543638bfd905af63a4a36
 
 # Start lane: 1/right - 4/left, clockwise, default: 1
 startlane=1
+
+# Car No (1-4)
+carno=1
 ```
 
 By default, the Kafka server is expected to listen on 127.0.0.1. If another server is being used, the server IPs for edge and cloud can be configured through the respective env variables:
@@ -44,7 +47,7 @@ The controller reads the anki track configuration from Github (https://github.co
 ## Running locally
 The service can be started locally by running
 ```
-node controller.js <config-filename>
+node controller.js <config-filename> kafka noble
 ```
 
 Kafka messages can be produced and consumed from command line using:
@@ -57,7 +60,7 @@ kafkacat -C -b 127.0.0.1:9092 -t Status
 
 The service can be used in a mocked way (for Kafka and noble (bluetooth)). So it is possible to run it without a bluetooth dongle and without having Kafka installed. The first parameter is the mock for Kafka, the second is the mock for bluetooth.
 
-`node controller.js <config-filename> "mock" "mock"`
+`node controller.js <config-filename> mock mock`
 
 When running in mocked mode, the service will read the configuration file from Github (https://github.com/cloudwan/edge-anki-config) and send dummy position data of the track from the configuration file.
 
