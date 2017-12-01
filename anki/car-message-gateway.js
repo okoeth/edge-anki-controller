@@ -28,8 +28,17 @@ class CarMessageGateway {
         this.writeCharacteristic = writeCharacteristic;
     }
 
-    setReadCharacteristics(readCharacteristic) {
-        this.readCarachteristic = readCharacteristic;
+    setReadCharacteristics(readCharacteristic, receivedMessageHandler) {
+        this.readCharacteristic = readCharacteristic;
+        this.readCharacteristic.notify(true, function (err) { });
+
+        this.readCharacteristic.on('read', function (data, isNotification) {
+            console.log('INFO: Data received which will be handled: ', data)
+
+            if(receivedMessageHandler !== undefined && receivedMessageHandler !== null) {
+                receivedMessageHandler();
+            }
+        });
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -55,6 +64,43 @@ class CarMessageGateway {
                 console.log('ERROR: Error sending command');
             }
         }
+    }
+
+    sendInitCommand(startlane) {
+        console.log('INFO: Send init command');
+        var initMessage = new Buffer(4);
+        initMessage.writeUInt8(0x03, 0);
+        initMessage.writeUInt8(0x90, 1);
+        initMessage.writeUInt8(0x01, 2);
+        initMessage.writeUInt8(0x01, 3);
+        this.writeCharacteristic.write(initMessage, false, function (err) {
+            if (!err) {
+                var initialOffset = 0.0;
+                if (startlane) {
+                    if (startlane == '1') initialOffset = 68.0;
+                    if (startlane == '2') initialOffset = 23.0;
+                    if (startlane == '3') initialOffset = -23.0;
+                    if (startlane == '4') initialOffset = -68.0;
+                }
+
+                initMessage = new Buffer(6);
+                initMessage.writeUInt8(0x05, 0);
+                initMessage.writeUInt8(0x2c, 1);
+                initMessage.writeFloatLE(initialOffset, 2);
+                this.writeCharacteristic.write(initMessage, false, function (err) {
+                    if (!err) {
+                        console.log('Initialization was successful');
+                        console.log('Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)');
+                    }
+                    else {
+                        console.log('Initialization error');
+                    }
+                });
+            }
+            else {
+                console.log('Initialization error');
+            }
+        });
     }
 }
 

@@ -30,8 +30,6 @@ var prepareMessages = require('./prepareMessages.js')();
 var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
 
-var readCharacteristic;
-var writeCharacteristic;
 var car;
 var lane;
 
@@ -127,18 +125,14 @@ config.read(process.argv[2], function (carNo, carId, startlane) {
 								function (callback) {
 									if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
 										console.log('INFO: Read characteristic');
-										readCharacteristic = characteristic;
-										readCharacteristic.notify(true, function (err) { });
-										characteristic.on('read', function (data, isNotification) {
-											console.log('INFO: Data received which will be handled: ', data)
-											receivedMessages.handle(data, carNo, kafka);
+										carMessageGateway.setReadCharacteristics(characteristic, function() {
+                                            receivedMessages.handle(data, carNo, kafka);
 										});
 									}
 									// Write characteristic => ignore
 									if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
 										console.log('INFO: Write characteristic', carMessageGateway);
 										carMessageGateway.setWriteCharacteristics(characteristic);
-										writeCharacteristic = characteristic;
 										init(startlane);
 										characteristic.on('read', function (data, isNotification) {
 											console.log('Data received which will be ignored - writeCharacteristic', data);
@@ -169,39 +163,7 @@ config.read(process.argv[2], function (carNo, carId, startlane) {
 function init(startlane) {
 	console.log("INFO: Initialise lane");
 	// turn on sdk and set offset
-	var initMessage = new Buffer(4);
-	initMessage.writeUInt8(0x03, 0);
-	initMessage.writeUInt8(0x90, 1);
-	initMessage.writeUInt8(0x01, 2);
-	initMessage.writeUInt8(0x01, 3);
-	writeCharacteristic.write(initMessage, false, function (err) {
-		if (!err) {
-			var initialOffset = 0.0;
-			if (startlane) {
-				if (startlane == '1') initialOffset = 68.0;
-				if (startlane == '2') initialOffset = 23.0;
-				if (startlane == '3') initialOffset = -23.0;
-				if (startlane == '4') initialOffset = -68.0;
-			}
-
-			initMessage = new Buffer(6);
-			initMessage.writeUInt8(0x05, 0);
-			initMessage.writeUInt8(0x2c, 1);
-			initMessage.writeFloatLE(initialOffset, 2);
-			writeCharacteristic.write(initMessage, false, function (err) {
-				if (!err) {
-					console.log('Initialization was successful');
-					console.log('Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)');
-				}
-				else {
-					console.log('Initialization error');
-				}
-			});
-		}
-		else {
-			console.log('Initialization error');
-		}
-	});
+	carMessageGateway.sendInitCommand(startlane);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
