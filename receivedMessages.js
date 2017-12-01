@@ -82,7 +82,7 @@ module.exports = function() {
 					'  "status_name"    : "' + desc + '",'+
 					'  "piece_location" : '  + pieceLocation + ','+
 					'  "real_piece_id"  : '  + realPieceId + ','+
-                    '  "piece_id"       : '  + internalPieceId + ','+
+                    '  "piece_id"       : ['  + internalPieceId + '],'+
 					'  "offset"         : '  + offset + ','+
 					'  "speed"          : '  + speed + ' }'
 				);
