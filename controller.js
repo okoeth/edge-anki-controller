@@ -29,12 +29,20 @@ var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
 var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
+const commandLineArgs = require('command-line-args')
+const optionDefinitions = [
+    { name: 'config', alias: 'c', type: String, defaultValue: "config-car1.properties" },
+    { name: 'kafka', alias: 'k', type: String },
+    { name: 'noble', alias: 'n', type: String }
+]
+// Read the actual options
+const options = commandLineArgs(optionDefinitions)
 
 var car;
 var lane;
 
 // Read properties and start receiving BLE messages
-config.read(process.argv[2], function (carNo, carId, startlane) {
+config.read(options['config'], function (carNo, carId, startlane) {
 	// Read properties
 	if (!carNo && isNaN(carNo * 1) && carNo > 0 && carNo < 5) {
 		console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
@@ -45,15 +53,15 @@ config.read(process.argv[2], function (carNo, carId, startlane) {
 		process.exit(1);
 	}
 	//setup kafka
-	if (process.argv.length >= 4) {
-		kafka = kafka_factory.create(process.argv[3], carNo, carMessageGateway);
+	if (options['kafka'] !== undefined) {
+		kafka = kafka_factory.create(options['kafka'], carNo, carMessageGateway);
 	} else {
 		kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
 	}
 
 	//setup noble
-	if (process.argv.length >= 5) {
-		noble = noble_factory.create(process.argv[4], carId);
+	if (options['noble']) {
+		noble = noble_factory.create(options['noble'], carId);
 	} else {
 		noble = noble_factory.create("noble", carId);
 	}

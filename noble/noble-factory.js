@@ -19,7 +19,7 @@
 
 var carMock;
 
-//var noble = require('noble');
+var noble = require('noble');
 
 module.exports.create = function(type, carId) {
     if(type === "mock") {

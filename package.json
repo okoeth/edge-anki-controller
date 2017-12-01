@@ -4,9 +4,10 @@
   "version": "0.0.1",
   "author": "NTT Group",
   "dependencies": {
-    "noble": "~1.2.1",
     "async": "~0.2.9",
+    "command-line-args": "^4.0.7",
     "kafka-node": "2.3.0",
+    "noble": "~1.2.1",
     "properties": "1.2.1"
   },
   "keywords": [

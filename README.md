@@ -22,7 +22,7 @@ provided. Sample configuration for a car from Ensō:
 ```
 # Bluetooth config (mandatory)
 
-# Car ID from discivery
+# Car ID from discovery
 carid=adf93c91ff4543638bfd905af63a4a36
 
 # Start lane: 1/right - 4/left, clockwise, default: 1
@@ -47,7 +47,7 @@ The controller reads the anki track configuration from Github (https://github.co
 ## Running locally
 The service can be started locally by running
 ```
-node controller.js <config-filename> kafka noble
+node controller.js --config <config-filename> 
 ```
 
 Kafka messages can be produced and consumed from command line using:
@@ -60,9 +60,17 @@ kafkacat -C -b 127.0.0.1:9092 -t Status
 
 The service can be used in a mocked way (for Kafka and noble (bluetooth)). So it is possible to run it without a bluetooth dongle and without having Kafka installed. The first parameter is the mock for Kafka, the second is the mock for bluetooth.
 
-`node controller.js <config-filename> mock mock`
+`node controller.js <config-filename> --kafka mock --noble mock`
 
 When running in mocked mode, the service will read the configuration file from Github (https://github.com/cloudwan/edge-anki-config) and send dummy position data of the track from the configuration file.
+
+## Command line arguments
+
+| Argument | Short form | Description                              |
+| -------- | ---------- | ---------------------------------------- |
+| --config | -c         | Sets the car configuration. Default is config-car1.properties. |
+| --kafka  | -k         | Sets kafka. Could be mock or anything else to use kafka as default. |
+| --noble  | -n         | Sets noble. Could be mock or anything else to use noble as default. |
 
 ## References
 
