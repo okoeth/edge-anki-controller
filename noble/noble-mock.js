@@ -28,12 +28,12 @@ class NobleMock extends EventEmitter {
     }
 
     startScanning() {
-        console.log("Noble mock start scanning");
+        console.log("INFO: Noble mock start scanning");
         this.interval = setInterval(this.mockDeviceDiscovered.bind(this), 1000)
     }
 
     stopScanning() {
-        console.log("Noble mock stop scanning");
+        console.log("INFO: Noble mock stop scanning");
         clearInterval(this.interval);
     }
 

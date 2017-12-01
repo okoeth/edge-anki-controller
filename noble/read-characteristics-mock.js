@@ -26,7 +26,7 @@ class ReadCharacteristicsMock extends EventEmitter {
     }
 
     notify() {
-        console.log("Mock read characteristics notify");
+        console.log("INFO: read characteristic mock notify");
     }
 
     mockReadFromDevice(message) {

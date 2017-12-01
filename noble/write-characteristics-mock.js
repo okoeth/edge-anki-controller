@@ -26,11 +26,11 @@ class WriteCharacteristicsMock extends EventEmitter {
     }
 
     notify() {
-        console.log("Mock write characteristics notify");
+        console.log("INFO: write characteristic mock notify");
     }
 
     write(message, flag, callback)  {
-        console.log("Mock write characteristics write: " + message);
+        console.log("INFO: write characteristic mock write: " + message);
         if(callback !== undefined)
             callback();
     }

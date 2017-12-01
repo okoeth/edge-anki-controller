@@ -17,23 +17,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-var carMock;
+class CarMessageGateway {
 
-//var noble = require('noble');
-
-module.exports.create = function(type, carId) {
-    if(type === "mock") {
-        console.log('INFO: Using noble mock');
-        //Set up all mock dependencies. The general data producer is the car mock
-        var NobleMock = require('./noble-mock');
-        var ReadCharacteristic = require('./read-characteristics-mock');
-        var CarMock = require('./car-mock');
-        var readCharacteristicMock = new  ReadCharacteristic();
-        carMock = new CarMock(readCharacteristicMock);
-        return new NobleMock(carId, readCharacteristicMock);
-    }
-    else {
-        console.log('INFO: Using noble');
-        return noble;
-    }
-};
+}

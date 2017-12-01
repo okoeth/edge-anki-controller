@@ -125,7 +125,7 @@ config.read(process.argv[2], function (carNo, carId, startlane) {
 								function (callback) {
 									if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
 										console.log('INFO: Read characteristic');
-										carMessageGateway.setReadCharacteristics(characteristic, function() {
+										carMessageGateway.setReadCharacteristics(characteristic, function(data) {
                                             receivedMessages.handle(data, carNo, kafka);
 										});
 									}

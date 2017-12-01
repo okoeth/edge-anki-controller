@@ -36,7 +36,7 @@ class CarMessageGateway {
             console.log('INFO: Data received which will be handled: ', data)
 
             if(receivedMessageHandler !== undefined && receivedMessageHandler !== null) {
-                receivedMessageHandler();
+                receivedMessageHandler(data);
             }
         });
     }
