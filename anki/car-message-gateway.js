@@ -67,6 +67,7 @@ class CarMessageGateway {
     }
 
     sendInitCommand(startlane) {
+        var that = this;
         console.log('INFO: Send init command');
         var initMessage = new Buffer(4);
         initMessage.writeUInt8(0x03, 0);
@@ -87,7 +88,7 @@ class CarMessageGateway {
                 initMessage.writeUInt8(0x05, 0);
                 initMessage.writeUInt8(0x2c, 1);
                 initMessage.writeFloatLE(initialOffset, 2);
-                this.writeCharacteristic.write(initMessage, false, function (err) {
+                that.writeCharacteristic.write(initMessage, false, function (err) {
                     if (!err) {
                         console.log('Initialization was successful');
                         console.log('Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)');

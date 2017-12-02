@@ -18,59 +18,44 @@
 // DEALINGS IN THE SOFTWARE.
 
 var MessageNames = require("./message-names");
-var PositionCalculator = require("./tile-position-calculator");
-var ankiPositionCalculator = new PositionCalculator();
+var PositionUpdateMessage = require('./messages/position-update-message');
+var PingMessage = require('./messages/ping-message');
+var VersionMessage = require('./messages/version-message');
+var BatteryMessage = require('./messages/battery-message');
+var TransitionUpdateMessage = require('./messages/transition-update-message');
+var DelocalizedMessage = require('./messages/vehicle-delocalized-message');
+var OffsetCenterMessage = require('./messages/offset-center-message');
+var OffsetChangedMessage = require('./messages/offset-changed-message');
 
-//TODO: Refactor as class
+class BluetoothMessageExtractor {
 
-class ReceivedMessages {
-
-	constructor(kafka) {
-		this.kafka = kafka;
+	constructor() {
 	}
 
-	handle(data, carNo) {
+	generateMessage(data) {
         var messageId = data.readUInt8(1);
         var date = new Date();
 
         if (messageId == '23') {
             // example: <Buffer 01 17>
-            var desc = MessageNames.PING;
-            //console.log('Message: ' + messageId, data, desc);
-            this.kafka.sendMessage('' +
-                '{ "status_id"   : "' + messageId + '",' +
-                '"status_name" : "' + desc + '" }'
-            );
+
+            return new PingMessage(messageId, MessageNames.PING, date);
         }
         else if (messageId == '25') {
             // example: <Buffer 05 19 6e 26 00 00>
-            var desc = MessageNames.VERSION;
             var version = data.readUInt16LE(2);
-            //console.log('Message: ' + messageId, data, desc + ' - version: ' + version);
-            this.kafka.sendMessage('{ "status_id"   : "' + messageId + '",' +
-                '  "status_name" : "' + desc + '",' +
-                '  "car_no"      : "' + carNo + '",' +
-                '  "version"     : "' + version + '" }');
+            return new VersionMessage(messageId, MessageNames.VERSION, date, version);
         }
         else if (messageId == '27') {
             // example: <Buffer 03 1b 50 0f>
-            var desc = MessageNames.BATTERY_LEVEL;
             var level = data.readUInt16LE(2);
-            //console.log('Message: ' + messageId, data, desc + ' - level: ' + level);
-            this.kafka.sendMessage(
-                '{ "status_id"   : "' + messageId + '",'+
-                '  "car_no"      : "' + carNo + '",'+
-                '  "status_name" : "' + desc + '",'+
-                '  "level"       : '  + level + ' }'
-            );
+            return new BatteryMessage(messageId, MessageNames.BATTERY_LEVEL, date, level);
         }
 
         else if (messageId == '39') {
             // example: <Buffer 10 27 21 28 48 e1 86 c2 02 01 47 00 00 00 02 fa 00>
-            var desc = MessageNames.POSITION_UPDATE;
             var pieceLocation = data.readUInt8(2);
             var realPieceId = data.readUInt8(3); // in my starter kit:
-            var internalPieceId = ankiPositionCalculator.getCarPosition(realPieceId);
             // 1 x straight: 36
             // 1 x straight: 39
             // 1 x straight: 40
@@ -81,48 +66,26 @@ class ReceivedMessages {
             // 1 x start/finish: 34 (long) and 33 (short)
             var offset = data.readFloatLE(4);
             var speed = data.readUInt16LE(8);
-            //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset + ' speed: ' + speed + ' - realPieceId: '  + realPieceId + ' pieceLocation: ' + pieceLocation);;
-            this.kafka.sendMessage(
-                '{ "status_id"      : "' + messageId + '",'+
-                '  "car_no"         : "' + carNo + '",'+
-                '  "status_name"    : "' + desc + '",'+
-                '  "piece_location" : '  + pieceLocation + ','+
-                '  "real_piece_id"  : '  + realPieceId + ','+
-                '  "piece_id"       : ['  + internalPieceId + '],'+
-                '  "offset"         : '  + offset + ','+
-                '  "speed"          : '  + speed + ' }'
-            );
+            return new PositionUpdateMessage(messageId, MessageNames.POSITION_UPDATE, date,
+                pieceLocation, realPieceId, offset, speed);
         }
 
         else if (messageId == '41') {
             // example: <Buffer 12 29 00 00 02 2b 55 c2 00 ff 81 46 00 00 00 00 00 25 32>
-            var desc = MessageNames.TRANSITION_UPDATE;
             var offset = data.readFloatLE(4);
-            //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-            this.kafka.sendMessage(
-                '{ "status_id"   : "' + messageId + '",'+
-                '  "car_no"      : "' + carNo + '",'+
-                '  "status_name" : "' + desc + '",'+
-                '  "offset"      : '  + offset + ' }'
-            );
+            return new TransitionUpdateMessage(messageId, MessageNames.TRANSITION_UPDATE, date, offset);
         }
 
         else if (messageId == '43') {
             // example: <Buffer 01 2b>
-            var desc = MessageNames.VEHICLE_DELOCALIZED;
+            return new DelocalizedMessage(messageId, MessageNames.VEHICLE_DELOCALIZED, date);
             console.log('Message: ' + messageId, data, desc);
         }
 
         else if (messageId == '45') {
             // example: <Buffer 06 2d 00 c8 75 3d 03>
-            var desc = MessageNames.OFFSET_CENTER;
             var offset = data.readFloatLE(2);
-            //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-            this.kafka.sendMessage(
-                '{ "status_id"   : "' + messageId + '",'+
-                '  "car_no"      : "' + carNo + '",'+
-                '  "status_name" : "' + desc +'" }'
-            );
+            return new OffsetCenterMessage(messageId, MessageNames.OFFSET_CENTER, date, offset);
         }
 
         else if (messageId == '54') {
@@ -137,15 +100,8 @@ class ReceivedMessages {
 
         else if (messageId == '65') {
             // example: <Buffer 0e 41 9a 99 7f 42 9a 99 7f 42 00 00 00 02 81>
-            var desc = MessageNames.OFFSET_CHANGED;
             var offset = data.readFloatLE(2);
-            //console.log('Message: ' + messageId, data, desc + ' - offset: '  + offset);
-            this.kafka.sendMessage(
-                '{ "status_id"   : "' + messageId + '",'+
-                '  "car_no"      : "' + carNo + '",'+
-                '  "status_name" : "' + desc + '",'+
-                '  "offset"      : '  + offset + ' }'
-            );
+            return new OffsetChangedMessage(messageId, MessageNames.OFFSET_CHANGED, date, offset);
         }
 
         else if (messageId == '67') {
@@ -174,4 +130,4 @@ class ReceivedMessages {
 	}
 }
 
-module.exports = ReceivedMessages;
+module.exports = BluetoothMessageExtractor;

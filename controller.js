@@ -24,8 +24,6 @@ var CarMessageGateway = require('./anki/car-message-gateway');
 var carMessageGateway = new CarMessageGateway();
 var readline = require('readline');
 var prepareMessages = require('./prepareMessages.js')();
-var ReceivedMessages = require('./anki/received-messages');
-var receivedMessages = undefined;
 var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
 var Car = require('./anki/car');
@@ -66,10 +64,6 @@ config.read(options['config'], function (carNo, carId, startlane) {
 	} else {
 		noble = noble_factory.create("noble", carId);
 	}
-
-	//Setup message receiver
-    receivedMessages = new ReceivedMessages(kafka);
-
 	lane = startlane;
 
 
@@ -88,8 +82,13 @@ config.read(options['config'], function (carNo, carId, startlane) {
 			var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
 			if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
 				console.log('INFO: Car discovered. ID: ' + peripheral.id);
-				car = new Car(carNo, startlane, receivedMessages);
+				car = new Car(carNo, startlane);
 				car.setPeripheral(peripheral);
+
+				// When car gets new message
+				car.on('messageReceived', function(message) {
+                    kafka.sendMessage(message);
+				});
 			}
 		}
 	});

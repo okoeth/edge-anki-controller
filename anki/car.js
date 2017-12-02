@@ -19,19 +19,28 @@
 
 var CarMessageGateway = require('./car-message-gateway');
 var async = require('async');
+const EventEmitter = require('events');
+const BluetoothMessageExtractor = require('./bluetooth-message-extractor');
+const PositionUpdateMessage = require('./messages/position-update-message');
+const PositionCalculator = require("./tile-position-calculator");
 
-class Car {
-    constructor(no, startLane, receivedMessages) {
+class Car extends EventEmitter {
+    constructor(no, startLane) {
+        super();
+
         this.carNo = no;
         this.startLane = startLane;
-        this.receivedMessages = receivedMessages;
+        this.bluetoothMessageExtractor = new BluetoothMessageExtractor();
         this.carMessageGateway = new CarMessageGateway();
+        this.positionCalculator = new PositionCalculator();
     }
 
-    updateLocation(lane, piece, position) {
-        this.lane = lane;
-        this.piece = piece;
-        this.position = position;
+    updateLocation(positionUpdateMessage) {
+        this.lane = positionUpdateMessage.lane;
+        this.realTileId = positionUpdateMessage.realPieceId;
+        this.tileId = positionUpdateMessage.internalPieceId;
+        this.position = positionUpdateMessage.pieceLocation;
+        this.lastUpdateTime = positionUpdateMessage.date;
     }
 
     setPeripheral(peripheral) {
@@ -80,14 +89,22 @@ class Car {
                                     if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
                                         console.log('INFO: Read characteristic');
                                         that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
-                                            that.receivedMessages.handle(data, that.carNo);
+                                            var message = that.bluetoothMessageExtractor.generateMessage(data);
+
+                                            if(message instanceof PositionUpdateMessage) {
+                                                message.internalPieceId =
+                                                    that.positionCalculator.getCarPosition(message.realPieceId, that.tileId);
+                                                that.updateLocation(message);
+                                            }
+
+                                            that.emit('messageReceived', that.generateJsonMessage(message));
                                         });
                                     }
                                     // Write characteristic => ignore
                                     if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
-                                        console.log('INFO: Write characteristic', carMessageGateway);
+                                        console.log('INFO: Write characteristic');
                                         that.carMessageGateway.setWriteCharacteristics(characteristic);
-                                        initCar();
+                                        that.initCar();
                                         characteristic.on('read', function (data, isNotification) {
                                             console.log('Data received which will be ignored - writeCharacteristic', data);
                                         });
@@ -117,6 +134,11 @@ class Car {
         console.log("INFO: Initialise lane");
         // turn on sdk and set offset
         this.carMessageGateway.sendInitCommand(this.startLane);
+    }
+
+    generateJsonMessage(message) {
+        message["carNo"] = this.carNo;
+        return JSON.stringify(message);
     }
 
     disconnect() {

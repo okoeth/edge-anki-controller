@@ -30,18 +30,51 @@ class TilePositionCalculator {
         this.trackConfiguration = trackConfiguration;
     }
 
-    getCarPosition(ankiTileId) {
+    getCarPosition(ankiTileId, previousTileIds) {
         if(!this.trackConfiguration)
             return -1;
 
         //find all possible tiles (anki tiles have no unique id)
         var possibleTiles = [];
-        for(var index in this.trackConfiguration) {
-            var tile = this.trackConfiguration[index];
-            if(tile.realId === ankiTileId)
-                possibleTiles.push(tile.id);
+
+        //we know where the car was previously,
+        //we search the next tile with the right anki tile id
+        if(previousTileIds !== undefined && previousTileIds.length === 1) {
+            var previousTileId = previousTileIds[0];
+            var previousTileFound = false;
+            var index = 0;
+            var loopsCompleted = 0;
+
+            while(true) {
+                var normalizedIndex = index % this.trackConfiguration.length;
+
+                //Safety first, should anyway not happen
+                if(loopsCompleted >= 2) {
+                    return [];
+                }
+
+                //We found the tile
+                if(this.trackConfiguration[normalizedIndex].id === previousTileId) {
+                    previousTileFound = true;
+                } else {
+                    if (previousTileFound && this.trackConfiguration[normalizedIndex].realId == ankiTileId)
+                        return [this.trackConfiguration[normalizedIndex].id];
+                }
+                index++;
+                if(index % this.trackConfiguration === 0)
+                    loopsCompleted++;
+            }
         }
-        return possibleTiles;
+        //We have no info about our last position, get all possibilities
+        else {
+            for (var index in this.trackConfiguration) {
+                var tile = this.trackConfiguration[index];
+
+                if (tile.realId === ankiTileId)
+                    possibleTiles.push(tile.id);
+            }
+            return possibleTiles;
+        }
     }
 }
 
