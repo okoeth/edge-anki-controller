@@ -18,17 +18,18 @@
 // DEALINGS IN THE SOFTWARE.
 
 var config = require('./config-wrapper.js')();
-var async = require('async');
 var noble_factory = require('./noble/noble-factory');
 var noble = undefined;
 var CarMessageGateway = require('./anki/car-message-gateway');
 var carMessageGateway = new CarMessageGateway();
-//var noble = require('noble');
 var readline = require('readline');
-var receivedMessages = require('./receivedMessages.js')();
 var prepareMessages = require('./prepareMessages.js')();
+var ReceivedMessages = require('./anki/received-messages');
+var receivedMessages = undefined;
 var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
+var Car = require('./anki/car');
+
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
     { name: 'config', alias: 'c', type: String, defaultValue: "config-car1.properties" },
@@ -66,6 +67,9 @@ config.read(options['config'], function (carNo, carId, startlane) {
 		noble = noble_factory.create("noble", carId);
 	}
 
+	//Setup message receiver
+    receivedMessages = new ReceivedMessages(kafka);
+
 	lane = startlane;
 
 
@@ -84,95 +88,12 @@ config.read(options['config'], function (carNo, carId, startlane) {
 			var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
 			if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
 				console.log('INFO: Car discovered. ID: ' + peripheral.id);
-				car = peripheral;
-				setUp(car);
+				car = new Car(carNo, startlane, receivedMessages);
+				car.setPeripheral(peripheral);
 			}
 		}
 	});
-
-	// Handle connection to car
-	function setUp(peripheral) {
-		// Handle disconnect
-		peripheral.on('disconnect', function () {
-			console.log('INFO: Car has been disconnected');
-			process.exit(0);
-		});
-
-		// Handle connect
-		peripheral.connect(function (error) {
-			console.log('INFO: Car has been connected');
-			if (error != null) {
-				console.log('ERROR: Error connection car', error);
-				process.exit(1);
-			}
-			// Handle services (there is only one service)
-			peripheral.discoverServices([], function (error, services) {
-				console.log('INFO: Discovered services');
-				if (error != null) {
-					console.log('ERROR: Error connection car', error);
-					process.exit(1);
-				}
-				
-				var service = services[0];
-
-				// Handle characteristics (iterate of all characteristics provided)
-				service.discoverCharacteristics([], function (error, characteristics) {
-					var characteristicIndex = 0;
-
-					async.whilst(
-						// Whilst condition
-						function () {
-							return (characteristicIndex < characteristics.length);
-						},
-						// Whilst body
-						function (callback) {
-							console.log('INFO: Next characteristic');
-							var characteristic = characteristics[characteristicIndex];
-							async.series([
-								// Step 1: Handle characteristic
-								function (callback) {
-									if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
-										console.log('INFO: Read characteristic');
-										carMessageGateway.setReadCharacteristics(characteristic, function(data) {
-                                            receivedMessages.handle(data, carNo, kafka);
-										});
-									}
-									// Write characteristic => ignore
-									if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
-										console.log('INFO: Write characteristic', carMessageGateway);
-										carMessageGateway.setWriteCharacteristics(characteristic);
-										init(startlane);
-										characteristic.on('read', function (data, isNotification) {
-											console.log('Data received which will be ignored - writeCharacteristic', data);
-										});
-									}
-									callback();
-								},
-								// Step 2: Increase counter / index
-								function () {
-									characteristicIndex++;
-									callback();
-								}
-							]);
-						},
-						// Whilst error handler
-						function (error) {
-							console.log('Error processing characteristics from peripheral service');
-						}
-					);
-				});
-			});
-		});
-	}
 });
-
-////////////////////////////////////////////////////////////////////////////////
-// Initialise system
-function init(startlane) {
-	console.log("INFO: Initialise lane");
-	// turn on sdk and set offset
-	carMessageGateway.sendInitCommand(startlane);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Manual input processing
@@ -208,5 +129,6 @@ process.on('SIGINT', exitHandler.bind(null, { exit: true }));
 process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 function exitHandler(options, err) {
-	if (car) car.disconnect();
+	if (car)
+		car.disconnect();
 }
