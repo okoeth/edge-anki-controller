@@ -91,7 +91,7 @@ class CarMessageGateway {
                 that.writeCharacteristic.write(initMessage, false, function (err) {
                     if (!err) {
                         console.log('Initialization was successful');
-                        console.log('Enter a command: help, s (speed), c (change lane), e (end/stop), l (lights), lp (lights pattern), o (offset), sdk, ping, bat, ver, q (quit)');
+                        console.log('Enter a command: help, s (carSpeed), c (change laneNo), e (end/stop), l (lights), lp (lights pattern), o (laneOffset), sdk, ping, bat, ver, q (quit)');
                     }
                     else {
                         console.log('Initialization error');

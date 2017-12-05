@@ -20,6 +20,8 @@ var prepareMessages = require('../prepareMessages.js')();
 var PositionUpdateMessage = require('./messages/position-update-message');
 var TransitionUpdateMessage = require('./messages/transition-update-message');
 var Tile = require('./tile');
+var TrackConfiguration = require('./track-configuration');
+var fs = require('fs');
 
 class TrackScanner {
 
@@ -32,67 +34,80 @@ class TrackScanner {
         this.currentLane = 1;
         this.currentCycle = 0;
         this.countTiles = 0;
+        this.laneOffsets = [68, 23, -23, -68];
     }
 
 
 
     messageReceived(message) {
         var that = this;
-        if(message instanceof PositionUpdateMessage) {
-            console.log("INFO: Scanning position update message");
+        if(message !== undefined) {
+            if (message instanceof PositionUpdateMessage) {
+                console.log("INFO: Scanning position update message");
 
-            if(this.transitionReceived) {
-                this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.realPieceId, "UNKNOWN");
-                this.tiles[this.tileIndex]["lane" + this.currentLane][message.pieceLocation] = message.pieceLocation;
-                this.transitionReceived = false;
+                if (this.transitionReceived) {
+                    if(this.tiles[this.tileIndex] === undefined)
+                        this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
+                    this.tiles[this.tileIndex]["laneNo" + this.currentLane][message.posLocation] = message.posLocation;
+                    this.transitionReceived = false;
+                }
+                //already seen the tile
+                else {
+                    this.tiles[this.tileIndex]["laneNo" + this.currentLane][message.posLocation] = message.posLocation;
+                }
             }
-            //already seen the tile
-            else {
-                this.tiles[this.tileIndex]["lane" + this.currentLane][message.pieceLocation] = message.pieceLocation;
+            else if (message instanceof TransitionUpdateMessage) {
+                console.log("INFO: Scanning transition update message");
+                this.transitionReceived = true;
+                this.tileIndex++;
             }
-        }
-        else if(message instanceof TransitionUpdateMessage) {
-            console.log("INFO: Scanning transition update message");
-            this.transitionReceived = true;
-            this.tileIndex++;
-        }
 
-        if(this.tileIndex >= this.countTiles) {
-            this.tileIndex = 0;
-            this.currentCycle++;
+            if (this.tileIndex >= this.countTiles) {
+                this.tileIndex = 0;
+                this.currentCycle++;
 
-            if(this.currentCycle >= 2) {
-                this.currentLane++;
-                //Switch lanes
-                this.currentCycle = 0;
+                if (this.currentCycle >= 2) {
+                    this.currentLane++;
+                    //Switch lanes
+                    this.currentCycle = 0;
 
-                if(this.currentLane > 4)
-                    console.log("INFO: Scanning completed");
-                else
-                    that.car.sendCommand("offset -64");
+                    if (this.currentLane > 4) {
+                        this.car.sendCommand("s 0");
+                        console.log("INFO: Scanning completed");
+                        this.car.removeListener("messageReceived", this.messageReceived.bind(this));
+                        this.configCompleted();
+                    }
+
+                    else
+                        that.car.sendCommand("c " + this.laneOffsets[this.currentLane-1]);
 
 
+                }
             }
-        }
 
-        console.log("INFO: Current scanned config: " + JSON.stringify(this.tiles));
+            console.log("INFO: Current scanned config: " + JSON.stringify(this.tiles));
+        }
     }
 
     scanTrack(countTiles) {
         //Let the car drive slowly (150)
-        this.car.sendCommand("s 150");
+        this.car.sendCommand("s 300");
 
         console.log('INFO: Starting scan');
 
         this.countTiles = countTiles;
 
         //Get the position and transition messages
-        this.car.on('messageReceived', this.bind);
-
-
-
+        this.car.on('messageReceived', this.messageReceived.bind(this));
 
         //Build up track configuration structure
+    }
+
+    configCompleted() {
+        fs.writeFile('track-config.json', JSON.stringify(this.tiles), function (err) {
+            if (err) return console.log(err);
+            console.log("Configuration file written");
+        })
     }
 }
 

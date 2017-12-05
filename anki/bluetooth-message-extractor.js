@@ -20,7 +20,7 @@
 var MessageNames = require("./message-names");
 var PositionUpdateMessage = require('./messages/position-update-message');
 var PingMessage = require('./messages/ping-message');
-var VersionMessage = require('./messages/version-message');
+var VersionMessage = require('./messages/car-message');
 var BatteryMessage = require('./messages/battery-message');
 var TransitionUpdateMessage = require('./messages/transition-update-message');
 var DelocalizedMessage = require('./messages/vehicle-delocalized-message');
@@ -35,28 +35,28 @@ class BluetoothMessageExtractor {
 	generateMessage(data) {
         var messageId = data.readUInt8(1);
         console.log('INFO: Reading Id:', messageId);
-        var date = new Date();
+        var messageTimestamp = new Date();
 
         if (messageId == '23') {
             // example: <Buffer 01 17>
 
-            return new PingMessage(messageId, MessageNames.PING, date);
+            return new PingMessage(messageId, MessageNames.PING, messageTimestamp);
         }
         else if (messageId == '25') {
             // example: <Buffer 05 19 6e 26 00 00>
-            var version = data.readUInt16LE(2);
-            return new VersionMessage(messageId, MessageNames.VERSION, date, version);
+            var carVersion = data.readUInt16LE(2);
+            return new VersionMessage(messageId, MessageNames.VERSION, messageTimestamp, carVersion);
         }
         else if (messageId == '27') {
             // example: <Buffer 03 1b 50 0f>
-            var level = data.readUInt16LE(2);
-            return new BatteryMessage(messageId, MessageNames.BATTERY_LEVEL, date, level);
+            var catBatteryLevel = data.readUInt16LE(2);
+            return new BatteryMessage(messageId, MessageNames.BATTERY_LEVEL, messageTimestamp, catBatteryLevel);
         }
 
         else if (messageId == '39') {
             // example: <Buffer 10 27 21 28 48 e1 86 c2 02 01 47 00 00 00 02 fa 00>
-            var pieceLocation = data.readUInt8(2);
-            var realPieceId = data.readUInt8(3); // in my starter kit:
+            var posLocation = data.readUInt8(2);
+            var posTileNo = data.readUInt8(3); // in my starter kit:
             // 1 x straight: 36
             // 1 x straight: 39
             // 1 x straight: 40
@@ -65,28 +65,28 @@ class BluetoothMessageExtractor {
             // 2 x curve: 18
             // 2 x curve: 17
             // 1 x start/finish: 34 (long) and 33 (short)
-            var offset = data.readFloatLE(4);
-            var speed = data.readUInt16LE(8);
-            return new PositionUpdateMessage(messageId, MessageNames.POSITION_UPDATE, date,
-                pieceLocation, realPieceId, offset, speed);
+            var laneOffset = data.readFloatLE(4);
+            var carSpeed = data.readUInt16LE(8);
+            return new PositionUpdateMessage(messageId, MessageNames.POSITION_UPDATE, messageTimestamp,
+                posLocation, posTileNo, laneOffset, carSpeed);
         }
 
         else if (messageId == '41') {
             // example: <Buffer 12 29 00 00 02 2b 55 c2 00 ff 81 46 00 00 00 00 00 25 32>
-            var offset = data.readFloatLE(4);
-            return new TransitionUpdateMessage(messageId, MessageNames.TRANSITION_UPDATE, date, offset);
+            var laneOffset = data.readFloatLE(4);
+            return new TransitionUpdateMessage(messageId, MessageNames.TRANSITION_UPDATE, messageTimestamp, laneOffset);
         }
 
         else if (messageId == '43') {
             // example: <Buffer 01 2b>
-            return new DelocalizedMessage(messageId, MessageNames.VEHICLE_DELOCALIZED, date);
+            return new DelocalizedMessage(messageId, MessageNames.VEHICLE_DELOCALIZED, messageTimestamp);
             console.log('Message: ' + messageId, data, desc);
         }
 
         else if (messageId == '45') {
             // example: <Buffer 06 2d 00 c8 75 3d 03>
-            var offset = data.readFloatLE(2);
-            return new OffsetCenterMessage(messageId, MessageNames.OFFSET_CENTER, date, offset);
+            var laneOffset = data.readFloatLE(2);
+            return new OffsetCenterMessage(messageId, MessageNames.OFFSET_CENTER, messageTimestamp, laneOffset);
         }
 
         else if (messageId == '54') {
@@ -101,8 +101,8 @@ class BluetoothMessageExtractor {
 
         else if (messageId == '65') {
             // example: <Buffer 0e 41 9a 99 7f 42 9a 99 7f 42 00 00 00 02 81>
-            var offset = data.readFloatLE(2);
-            return new OffsetChangedMessage(messageId, MessageNames.OFFSET_CHANGED, date, offset);
+            var laneOffset = data.readFloatLE(2);
+            return new OffsetChangedMessage(messageId, MessageNames.OFFSET_CHANGED, messageTimestamp, laneOffset);
         }
 
         else if (messageId == '67') {

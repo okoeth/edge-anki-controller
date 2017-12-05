@@ -19,11 +19,12 @@
 
 class CarMessage {
 
-    constructor(messageId, statusName, date) {
+    constructor(messageId, messageName, messageTimestamp) {
         this.messageId = messageId;
-        this.statusName = statusName;
-        this.date = date;
+        this.messageName = messageName;
+        this.messageTimestamp = messageTimestamp;
         this.carNo = null;
+        this.carID = null;
     }
 }
 

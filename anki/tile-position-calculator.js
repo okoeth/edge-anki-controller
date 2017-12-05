@@ -19,6 +19,7 @@
 
 const TrackConfigurationLoader = require('./track-configuration-loader');
 const Tile = require('./tile');
+const PosOption = require('./pos-option');
 
 class TilePositionCalculator {
 
@@ -60,7 +61,7 @@ class TilePositionCalculator {
                     previousTileFound = true;
                 } else {
                     if (previousTileFound && this.trackConfiguration[normalizedIndex].realId == ankiTileId)
-                        return [this.trackConfiguration[normalizedIndex].id];
+                        return [ new PosOption(this.trackConfiguration[normalizedIndex].id, 1)];
                 }
                 index++;
                 if(index % this.trackConfiguration.length === 0)
@@ -73,7 +74,7 @@ class TilePositionCalculator {
                 var tile = this.trackConfiguration[index];
 
                 if (tile.realId === ankiTileId)
-                    possibleTiles.push(tile.id);
+                    possibleTiles.push(new PosOption(tile.id, 1));
             }
             return possibleTiles;
         }

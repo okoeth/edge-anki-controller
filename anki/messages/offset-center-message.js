@@ -21,9 +21,9 @@ var CarMessage = require('./car-message');
 
 class OffsetCenterMessage extends CarMessage {
 
-    constructor(messageId, statusName, date, offset) {
-        super(messageId, statusName, date);
-        this.offset = offset;
+    constructor(messageId, messageName, messageTimestamp, laneOffset) {
+        super(messageId, messageName, messageTimestamp);
+        this.laneOffset = laneOffset;
     }
 }
 

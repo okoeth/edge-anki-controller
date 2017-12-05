@@ -21,16 +21,17 @@ var CarMessage = require('./car-message');
 
 class PositionUpdateMessage extends CarMessage {
 
-    constructor(messageId, statusName, date, pieceLocation, realPieceId, offset, speed) {
-        super(messageId, statusName, date);
-        this.pieceLocation = pieceLocation;
-        this.realPieceId = realPieceId;
-        this.offset = offset;
-        this.speed = speed;
-        //lane has to be calculated
-        this.lane = null;
+    constructor(messageId, messageName, messageTimestamp, posLocation, posTileNo, laneOffset, carSpeed) {
+        super(messageId, messageName, messageTimestamp);
+        this.posLocation = posLocation;
+        this.posTileNo = posTileNo;
+        this.laneOffset = laneOffset;
+        this.carSpeed = carSpeed;
+        //laneNo has to be calculated
+        this.laneNo = null;
+        this.tileType = null;
         //internal position has to be calculated
-        this.internalPieceId = [];
+        this.posOptions = [];
     }
 }
 

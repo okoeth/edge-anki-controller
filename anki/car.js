@@ -36,11 +36,11 @@ class Car extends EventEmitter {
     }
 
     updateLocation(positionUpdateMessage) {
-        this.lane = positionUpdateMessage.lane;
-        this.realTileId = positionUpdateMessage.realPieceId;
-        this.tileId = positionUpdateMessage.internalPieceId;
-        this.position = positionUpdateMessage.pieceLocation;
-        this.lastUpdateTime = positionUpdateMessage.date;
+        this.laneNo = positionUpdateMessage.laneNo;
+        this.realTileId = positionUpdateMessage.posTileNo;
+        this.tileId = positionUpdateMessage.posOptions;
+        this.position = positionUpdateMessage.posLocation;
+        this.lastUpdateTime = positionUpdateMessage.messageTimestamp;
     }
 
     setPeripheral(peripheral) {
@@ -89,10 +89,11 @@ class Car extends EventEmitter {
                                     if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
                                         console.log('INFO: Read characteristic');
                                         that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
-                                            console.log('INFO: Callback on read:', data)
+
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
                                             
                                             if (message !== undefined) {
+                                                console.log("INFO: Received message: " + JSON.stringify(message));
                                                 if(message instanceof PositionUpdateMessage) {
 
                                                     /***
@@ -100,8 +101,8 @@ class Car extends EventEmitter {
                                                      * don't use for calculation of internal piece id
                                                      */
                                                     console.log('INFO: TileID:', that.tileId);
-                                                    message.internalPieceId =
-                                                        that.positionCalculator.getCarPosition(message.realPieceId, that.tileId);
+                                                    message.posOptions =
+                                                        that.positionCalculator.getCarPosition(message.posTileNo, that.tileId);
                                                     that.updateLocation(message);
                                                 }
 
@@ -140,8 +141,8 @@ class Car extends EventEmitter {
     initCar() {
         ////////////////////////////////////////////////////////////////////////////////
         // Initialise system
-        console.log("INFO: Initialise lane");
-        // turn on sdk and set offset
+        console.log("INFO: Initialise laneNo");
+        // turn on sdk and set laneOffset
         this.carMessageGateway.sendInitCommand(this.startLane);
     }
 
@@ -151,6 +152,7 @@ class Car extends EventEmitter {
 
     addFieldsToMessage(message) {
         message["carNo"] = this.carNo;
+        message["carID"] = this.peripheral.id;
         return message;
     }
 

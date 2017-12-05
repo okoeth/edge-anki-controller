@@ -17,13 +17,12 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-var CarMessage = require('./car-message');
+class PosOption {
 
-class PingMessage extends CarMessage {
-
-    constructor(messageId, messageName, messageTimestamp) {
-        super(messageId, messageName, messageTimestamp);
+    constructor(id, probability) {
+        this.id = id;
+        this.probability = probability;
     }
 }
 
-module.exports = PingMessage;
+module.exports = PosOption;

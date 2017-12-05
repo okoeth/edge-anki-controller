@@ -21,9 +21,9 @@ var CarMessage = require('./car-message');
 
 class VersionMessage extends CarMessage {
 
-    constructor(messageId, statusName, date, version) {
-        super(messageId, statusName, date);
-        this.version = version;
+    constructor(messageId, messageName, messageTimestamp, carVersion) {
+        super(messageId, messageName, messageTimestamp);
+        this.carVersion = carVersion;
     }
 }
 
