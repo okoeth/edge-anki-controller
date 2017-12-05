@@ -18,7 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 const EventEmitter = require('events');
-const TrackConfiguration = require('../anki/track-configuration');
+const TrackConfigurationLoader = require('../anki/track-configuration-loader');
 
 class CarMock {
 
@@ -27,7 +27,7 @@ class CarMock {
         this.trackConfiguration = undefined;
         this.trackTileIndex = 0;
 
-        new TrackConfiguration().getTrackConfig(this.setTrackConfiguration.bind(this));
+        new TrackConfigurationLoader().getTrackConfig(this.setTrackConfiguration.bind(this));
     }
 
     setTrackConfiguration(trackConfiguration) {

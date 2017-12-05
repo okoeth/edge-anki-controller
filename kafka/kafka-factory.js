@@ -20,14 +20,12 @@
 module.exports.create = function(type, carNo, carMessageGateway) {
     if(type === "mock") {
         console.log("INFO: Using kafka mocked" );
-        var kafka = require("./kafka-mock");
-        kafka.init(carNo)
-        return kafka;
+        var KafkaMock = require("./kafka-mock");
+        return new KafkaMock(carNo);
     }
     else {
         console.log("INFO: Using kafka");
-        var kafka = require("./kafka");
-        kafka.init(carNo, carMessageGateway)
-        return kafka
+        var Kafka = require("./kafka");
+        return new Kafka(carNo);
     }
 };

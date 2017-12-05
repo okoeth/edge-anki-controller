@@ -92,6 +92,12 @@ class Car extends EventEmitter {
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
 
                                             if(message instanceof PositionUpdateMessage) {
+
+                                                /***
+                                                 * TODO: If last update was a while ago (time difference),
+                                                 * don't use for calculation of internal piece id
+                                                 */
+
                                                 message.internalPieceId =
                                                     that.positionCalculator.getCarPosition(message.realPieceId, that.tileId);
                                                 that.updateLocation(message);
@@ -134,6 +140,10 @@ class Car extends EventEmitter {
         console.log("INFO: Initialise lane");
         // turn on sdk and set offset
         this.carMessageGateway.sendInitCommand(this.startLane);
+    }
+
+    sendCommand(cmd) {
+        this.carMessageGateway.sendCommand(cmd);
     }
 
     generateJsonMessage(message) {

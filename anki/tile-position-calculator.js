@@ -17,13 +17,13 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-const TrackConfiguration = require('./track-configuration');
+const TrackConfigurationLoader = require('./track-configuration-loader');
 const Tile = require('./tile');
 
 class TilePositionCalculator {
 
     constructor() {
-        new TrackConfiguration().getTrackConfig(this.setTrackConfiguration.bind(this));
+        new TrackConfigurationLoader().getTrackConfig(this.setTrackConfiguration.bind(this));
     }
 
     setTrackConfiguration(trackConfiguration) {

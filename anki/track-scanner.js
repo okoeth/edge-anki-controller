@@ -17,16 +17,20 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-const EventEmitter = require('events');
+class TrackScanner {
 
-class KafkaMock extends EventEmitter {
-    constructor(carNo) {
-        super();
-        console.log("Kafka mock initialized for car " + carNo);
+    constructor(car) {
+        this.car = car;
     }
 
-    sendMessage(message) {
-        console.log("Fake message sent: " + message);
+    scanTrack(countTiles) {
+        //Let the car drive slowly (150)
+
+
+        //Get the position and transition messages
+
+        //Build up track configuration structure
     }
 }
-module.exports = KafkaMock;
+
+module.exports = TrackScanner;

@@ -27,6 +27,7 @@ var prepareMessages = require('./prepareMessages.js')();
 var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
 var Car = require('./anki/car');
+var TrackScanner = require('./anki/track-scanner');
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
@@ -57,6 +58,10 @@ config.read(options['config'], function (carNo, carId, startlane) {
 	} else {
 		kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
 	}
+
+	kafka.on('message', function(message) {
+       	car.sendMessage(message);
+	});
 
 	//setup noble
 	if (options['noble']) {
@@ -113,9 +118,23 @@ cli.on('line', function (cmd) {
 				console.log(data);
 			});
 	}
+	else if(cmd == 'scan') {
+		console.log("INFO: Scan command from CLI");
+        var commandArray;
+		commandArray = command.split(' ');
+		var countTiles = 0;
+		if (commandArray.length > 0) {
+			countTiles = commandArray[1];
+		}
+
+		if(countTiles > 0) {
+            var trackScanner = new TrackScanner(car);
+            trackScanner.scanTrack(countTiles);
+        }
+	}
 	else {
 		console.log("INFO: Send command from CLI");
-		carMessageGateway.sendCommand(cmd);
+		car.sendCommand(cmd);
 	}
 });
 

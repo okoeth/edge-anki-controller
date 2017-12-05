@@ -17,42 +17,10 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-const request = require('request');
-const Tile = require('./tile');
+class TrackConfiguration  {
 
-class TrackConfiguration {
-
-    constructor() {
-        this.github_config_url = process.env.EDGE_GITHUB_URL;
-        if (this.github_config_url==null){
-            console.log('Using https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json as default configuration repository');
-            this.github_config_url='https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json'
-        }
-    }
-
-    getTrackConfig(callback) {
-        if(!this.trackConfiguration) {
-            request({ url: this.github_config_url, json: true}, function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    console.log("Imported track configuration successfully");
-
-                    this.trackConfiguration = [];
-                    for(var index in body) {
-                        var tile = body[index];
-                        this.trackConfiguration.push(new Tile(tile.id, tile.real_tile_id, tile.type));
-                    }
-
-                    if(callback !== undefined)
-                        callback(this.trackConfiguration)
-                } else {
-                    console.log("Error loading track configuration");
-                }
-            });
-        }
-        else {
-            if(callback !== undefined)
-                callback(this.trackConfiguration)
-        }
+    constructor(tiles) {
+        this.tiles = tiles;
     }
 }
 

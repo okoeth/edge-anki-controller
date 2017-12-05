@@ -18,71 +18,75 @@
 // DEALINGS IN THE SOFTWARE.
 
 var kafka = require('kafka-node');
+const EventEmitter = require('events');
 
 var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
 var kafkaCloudServer = process.env.KAFKA_CLOUD_SERVER;
-var kafkaClient;
-var kafkaProducer;
-var kafkaConsumer;
-var carMessageGateway;
 
-module.exports.sendMessage = function(message) {
-    console.log("INFO: Kafka SendMessage invoked: ", message);
-    kafkaProducer.send([{topic: 'Status', messages: message, partition: 0}],
-        function (err, data) {            
-            if (err!=null) {
-                console.log("ERROR: Error sending message: ", err);
+class Kafka extends EventEmitter {
+
+    constructor(carNo) {
+        super();
+        var that = this;
+        if (kafkaEdgeServer==null || kafkaEdgeServer==''){
+            console.log('Using 127.0.0.1 as default Kafka edge server.');
+            kafkaEdgeServer='127.0.0.1'
+        }
+
+        if (kafkaCloudServer==null || kafkaCloudServer==''){
+            console.log('Using 127.0.0.1 as default Kafka cloud server.');
+            kafkaCloudServer='127.0.0.1'
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////
+        // Set-up Kafak client, producer, and consumer
+        this.kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
+        this.kafkaProducer = new kafka.Producer(kafkaClient);
+
+        this.kafkaProducer.on('ready', function () {
+            console.log('Kafka producer is ready.');
+        });
+
+        this.kafkaProducer.on('error', function (err) {
+            console.log('Error in Kafka producer: '+err);
+        });
+
+        console.log('INFO: Connection Kafka Consumer on Topic Command'+carNo);
+        this.kafkaConsumer = new kafka.Consumer(
+            that.kafkaClient,
+            [
+                { topic: 'Command'+carNo, partition: 0 }
+            ],
+            {
+                autoCommit: true
             }
-        }
-    );
-}
+        );
 
-module.exports.init = function(carNo, newCarMessageGateway) {
-    carMessageGateway = newCarMessageGateway;
-    if (kafkaEdgeServer==null || kafkaEdgeServer==''){
-        console.log('Using 127.0.0.1 as default Kafka edge server.');
-        kafkaEdgeServer='127.0.0.1'
+        this.kafkaConsumer.on('message', function (message) {
+            console.log('INFO: Received: ', message);
+            that.emit('message', message);
+        });
+
+        this.kafkaConsumer.on('error', function (err) {
+            console.log('ERROR: Error in Kafka consumer: '+err);
+        });
+
+        this.kafkaConsumer.on('offsetOutOfRange', function (err) {
+            console.log('ERROR: Error offsetOutOfRange in Kafka consumer: '+err);
+        });
     }
 
-    if (kafkaCloudServer==null || kafkaCloudServer==''){
-        console.log('Using 127.0.0.1 as default Kafka cloud server.');
-        kafkaCloudServer='127.0.0.1'
+    sendMessage(message) {
+        console.log("INFO: Kafka SendMessage invoked: ", message);
+        this.kafkaProducer.send([{topic: 'Status', messages: message, partition: 0}],
+            function (err, data) {
+                if (err!=null) {
+                    console.log("ERROR: Error sending message: ", err);
+                }
+            }
+        );
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    // Set-up Kafak client, producer, and consumer
-    kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
-    kafkaProducer = new kafka.Producer(kafkaClient);
-
-    kafkaProducer.on('ready', function () {
-        console.log('Kafka producer is ready.');
-    });
-
-    kafkaProducer.on('error', function (err) {
-        console.log('Error in Kafka producer: '+err);
-    });
-
-    console.log('INFO: Connection Kafka Consumer on Topic Command'+carNo);
-    kafkaConsumer = new kafka.Consumer(
-        kafkaClient,
-        [
-            { topic: 'Command'+carNo, partition: 0 }
-        ],
-        {
-            autoCommit: true
-        }
-    );
-
-    kafkaConsumer.on('message', function (message) {
-        console.log('INFO: Received: ', message);
-        //carMessageGateway.sendCommand(message.value);
-    });
-
-    kafkaConsumer.on('error', function (err) {
-        console.log('ERROR: Error in Kafka consumer: '+err);
-    });
-
-    kafkaConsumer.on('offsetOutOfRange', function (err) {
-        console.log('ERROR: Error offsetOutOfRange in Kafka consumer: '+err);
-    });
 }
+
+module.exports = Kafka;
