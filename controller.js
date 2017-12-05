@@ -61,7 +61,11 @@ config.read(options['config'], function (carNo, carId, startlane) {
 	}
 
 	kafka.on('message', function(message) {
-       	car.sendMessage(message);
+		if (car !== undefined && message.value != undefined) {
+		   car.sendCommand(message.value);
+		} else {
+			console.log('WARNING: Ignoring command... car not ready: ', message);
+		}
 	});
 
 	//setup noble

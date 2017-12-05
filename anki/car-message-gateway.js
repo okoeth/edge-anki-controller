@@ -44,8 +44,8 @@ class CarMessageGateway {
     ////////////////////////////////////////////////////////////////////////////////
     // Send command to car
     sendCommand(command) {
-        console.log('INFO: Invoke command: '+ command)
-        //console.log('INFO: Preparer: ', prepareMessages)
+        console.log('INFO: Invoke command: ', command)
+        console.log('INFO: Preparer: ', prepareMessages)
         
         var message = prepareMessages.format(command);
         if (message) {
