@@ -22,6 +22,8 @@ var async = require('async');
 const EventEmitter = require('events');
 const BluetoothMessageExtractor = require('./bluetooth-message-extractor');
 const PositionUpdateMessage = require('./messages/position-update-message');
+const VehicleDelocalizedMessage = require('./messages/vehicle-delocalized-message');
+const TransitionUpdateMessage = require('./messages/transition-update-message');
 const PositionCalculator = require("./tile-position-calculator");
 
 class Car extends EventEmitter {
@@ -33,6 +35,7 @@ class Car extends EventEmitter {
         this.bluetoothMessageExtractor = new BluetoothMessageExtractor();
         this.carMessageGateway = new CarMessageGateway();
         this.positionCalculator = new PositionCalculator(trackConfiguration);
+        this.currentTileIndex = -1;
     }
 
     updateLocation(positionUpdateMessage) {
@@ -42,6 +45,17 @@ class Car extends EventEmitter {
         this.position = positionUpdateMessage.posLocation;
         this.lastUpdateTime = positionUpdateMessage.msgTimestamp;
     }
+
+    resetLocation() {
+        this.laneNo = undefined;
+        this.realTileId = undefined;
+        this.tileId = undefined;
+        this.position = undefined;
+        this.lastUpdateTime = undefined;
+        this.currentTileIndex = -1;
+    }
+
+
 
     setPeripheral(peripheral) {
         var that = this;
@@ -102,8 +116,18 @@ class Car extends EventEmitter {
                                                      */
                                                     console.log('INFO: TileID:', that.tileId);
                                                     message.posOptions =
-                                                        that.positionCalculator.getCarPosition(message.posTileNo, that.tileId);
+                                                        that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
+
+                                                    if(message.posOptions.length == 1)
+                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0]);
+
                                                     that.updateLocation(message);
+                                                }
+                                                else if(message instanceof TransitionUpdateMessage) {
+                                                    that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                }
+                                                else if(message instanceof VehicleDelocalizedMessage) {
+                                                    that.resetLocation();
                                                 }
 
                                                 that.emit('messageReceived', that.addFieldsToMessage(message));

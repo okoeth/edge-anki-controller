@@ -30,7 +30,7 @@ class TilePositionCalculator {
         this.trackConfiguration = trackConfiguration;
     }
 
-    getCarPosition(ankiTileId, previousTileIds) {
+    getCarPosition(ankiTileId, previousTileIndex) {
 
         //TODO: Somehow its hanging here
         if(!this.trackConfiguration)
@@ -41,8 +41,8 @@ class TilePositionCalculator {
 
         //we know where the car was previously,
         //we search the next tile with the right anki tile id
-        if(previousTileIds !== undefined && previousTileIds.length === 1) {
-            var previousTileId = previousTileIds[0];
+        if(previousTileIndex > -1) {
+            var previousTileId = this.trackConfiguration[previousTileIndex];
             var previousTileFound = false;
             var index = 0;
             var loopsCompleted = 0;
@@ -76,6 +76,21 @@ class TilePositionCalculator {
                     possibleTiles.push(new PosOption(tile.id, 1));
             }
             return possibleTiles;
+        }
+    }
+
+    getNextTileIndex(currentTileIndex) {
+        var newTileIndex = currentTileIndex+1;
+        if(newTileIndex == this.trackConfiguration.length) {
+            newTileIndex = 0;
+        }
+        return newTileIndex;
+    }
+
+    getIndexFromTileId(tileId) {
+        for(var index = 0; index < this.trackConfiguration.length; index++) {
+            if(this.trackConfiguration[index].id == tileId)
+                return index;
         }
     }
 }
