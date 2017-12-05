@@ -89,25 +89,29 @@ class Car extends EventEmitter {
                                     if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
                                         console.log('INFO: Read characteristic');
                                         that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
+                                            console.log('INFO: Callback on read:', data)
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
+                                            
+                                            if (message !== undefined) {
+                                                if(message instanceof PositionUpdateMessage) {
 
-                                            if(message instanceof PositionUpdateMessage) {
+                                                    /***
+                                                     * TODO: If last update was a while ago (time difference),
+                                                     * don't use for calculation of internal piece id
+                                                     */
+                                                    console.log('INFO: TileID:', that.tileId);
+                                                    message.internalPieceId =
+                                                        that.positionCalculator.getCarPosition(message.realPieceId, that.tileId);
+                                                    that.updateLocation(message);
+                                                }
 
-                                                /***
-                                                 * TODO: If last update was a while ago (time difference),
-                                                 * don't use for calculation of internal piece id
-                                                 */
+                                                that.emit('messageReceived', that.generateJsonMessage(message));
 
-                                                message.internalPieceId =
-                                                    that.positionCalculator.getCarPosition(message.realPieceId, that.tileId);
-                                                that.updateLocation(message);
                                             }
-
-                                            that.emit('messageReceived', that.generateJsonMessage(message));
                                         });
                                     }
                                     // Write characteristic => ignore
-                                    if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
+                                    else if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
                                         console.log('INFO: Write characteristic');
                                         that.carMessageGateway.setWriteCharacteristics(characteristic);
                                         that.initCar();

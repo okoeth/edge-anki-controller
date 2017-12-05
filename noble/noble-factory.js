@@ -18,6 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 var carMock;
+var noble = require('noble');
 
 module.exports.create = function(type, carId) {
     if(type === "mock") {
@@ -32,6 +33,6 @@ module.exports.create = function(type, carId) {
     }
     else {
         console.log('INFO: Using noble');
-        return require('./noble');
+        return noble; //require('./noble');
     }
 };

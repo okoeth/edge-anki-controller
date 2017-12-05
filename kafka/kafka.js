@@ -41,7 +41,7 @@ class Kafka extends EventEmitter {
         ////////////////////////////////////////////////////////////////////////////////
         // Set-up Kafak client, producer, and consumer
         this.kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
-        this.kafkaProducer = new kafka.Producer(kafkaClient);
+        this.kafkaProducer = new kafka.Producer(this.kafkaClient);
 
         this.kafkaProducer.on('ready', function () {
             console.log('Kafka producer is ready.');
