@@ -19,9 +19,9 @@
 
 class PosOption {
 
-    constructor(id, probability) {
-        this.id = id;
-        this.probability = probability;
+    constructor(optTileNo, optProbability) {
+        this.optTileNo = optTileNo;
+        this.optProbability = optProbability;
     }
 }
 

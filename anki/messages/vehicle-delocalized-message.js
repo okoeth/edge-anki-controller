@@ -21,8 +21,8 @@ var CarMessage = require('./car-message');
 
 class VehicleDelocalizedMessage extends CarMessage {
 
-    constructor(messageId, messageName, messageTimestamp) {
-        super(messageId, messageName, messageTimestamp);
+    constructor(msgID, msgName, msgTimestamp) {
+        super(msgID, msgName, msgTimestamp);
     }
 }
 

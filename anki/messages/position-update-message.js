@@ -21,8 +21,8 @@ var CarMessage = require('./car-message');
 
 class PositionUpdateMessage extends CarMessage {
 
-    constructor(messageId, messageName, messageTimestamp, posLocation, posTileNo, laneOffset, carSpeed) {
-        super(messageId, messageName, messageTimestamp);
+    constructor(msgID, msgName, msgTimestamp, posLocation, posTileNo, laneOffset, carSpeed) {
+        super(msgID, msgName, msgTimestamp);
         this.posLocation = posLocation;
         this.posTileNo = posTileNo;
         this.laneOffset = laneOffset;

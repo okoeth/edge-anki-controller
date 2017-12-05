@@ -21,8 +21,8 @@ var CarMessage = require('./car-message');
 
 class BatteryMessage extends CarMessage {
 
-    constructor(messageId, messageName, messageTimestamp, carBatteryLevel) {
-        super(messageId, messageName, messageTimestamp);
+    constructor(msgID, msgName, msgTimestamp, carBatteryLevel) {
+        super(msgID, msgName, msgTimestamp);
         this.carBatteryLevel = carBatteryLevel;
     }
 }

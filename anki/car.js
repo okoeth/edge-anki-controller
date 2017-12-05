@@ -40,7 +40,7 @@ class Car extends EventEmitter {
         this.realTileId = positionUpdateMessage.posTileNo;
         this.tileId = positionUpdateMessage.posOptions;
         this.position = positionUpdateMessage.posLocation;
-        this.lastUpdateTime = positionUpdateMessage.messageTimestamp;
+        this.lastUpdateTime = positionUpdateMessage.msgTimestamp;
     }
 
     setPeripheral(peripheral) {
