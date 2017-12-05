@@ -48,12 +48,12 @@ class TrackScanner {
                 if (this.transitionReceived) {
                     if(this.tiles[this.tileIndex] === undefined)
                         this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
-                    this.tiles[this.tileIndex]["laneNo" + this.currentLane][message.posLocation] = message.posLocation;
+                    this.tiles[this.tileIndex]["lane" + this.currentLane][message.posLocation] = message.posLocation;
                     this.transitionReceived = false;
                 }
                 //already seen the tile
                 else {
-                    this.tiles[this.tileIndex]["laneNo" + this.currentLane][message.posLocation] = message.posLocation;
+                    this.tiles[this.tileIndex]["lane" + this.currentLane][message.posLocation] = message.posLocation;
                 }
             }
             else if (message instanceof TransitionUpdateMessage) {

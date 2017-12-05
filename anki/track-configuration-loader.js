@@ -19,10 +19,11 @@
 
 const request = require('request');
 const Tile = require('./tile');
+var fs = require('fs');
 
 class TrackConfigurationLoader {
 
-    constructor() {
+    constructor(configurationPath) {
         this.github_config_url = process.env.EDGE_GITHUB_URL;
         if (this.github_config_url==null){
             console.log('Using https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json as default configuration repository');

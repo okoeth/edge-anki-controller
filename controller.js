@@ -33,7 +33,8 @@ const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
     { name: 'config', alias: 'c', type: String, defaultValue: "config-car1.properties" },
     { name: 'kafka', alias: 'k', type: String },
-    { name: 'noble', alias: 'n', type: String }
+    { name: 'noble', alias: 'n', type: String },
+	{ name: 'trackConfig', alias: 't', type: String, defaultValue: "https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json"}
 ]
 // Read the actual options
 const options = commandLineArgs(optionDefinitions)

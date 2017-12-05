@@ -86,21 +86,27 @@ module.exports = function() {
 	  }
 
 	  if (cmd == "c") { // change lane
-	  	// input parameter 1: offset, default: 0, valid: -68 - 68
-	    var offset = 0.0;
+	    var lane = 1;
+	    //lane offsets where 68 is most inner and -68 most outer
+		var laneOffsets = [68, 23, -23, -68];
 
 	    if (commandArray) {
 	      if (commandArray.length > 1) {	
-          	offset = commandArray[1];
+          	lane = commandArray[1];
+
+          	if(lane < 0 || lane > 4)
+          		lane = 1;
 	  	  }
 	  	}
+
+	  	var laneOffset = laneOffsets[lane-1];
 
 	    message = new Buffer(12);
 	    message.writeUInt8(11, 0);
 	    message.writeUInt8(0x25, 1);
 		message.writeInt16LE(250, 2);
 	    message.writeInt16LE(1000, 4);    
-	    message.writeFloatLE(offset, 6);      
+	    message.writeFloatLE(laneOffset, 6);
 	  }
 
 	  if (cmd == "o") { // set offset
