@@ -34,6 +34,7 @@ class BluetoothMessageExtractor {
 
 	generateMessage(data) {
         var messageId = data.readUInt8(1);
+        console.log('INFO: Reading Id:', messageId);
         var date = new Date();
 
         if (messageId == '23') {
