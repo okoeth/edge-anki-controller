@@ -25,14 +25,14 @@ const PositionUpdateMessage = require('./messages/position-update-message');
 const PositionCalculator = require("./tile-position-calculator");
 
 class Car extends EventEmitter {
-    constructor(no, startLane) {
+    constructor(no, startLane, trackConfiguration) {
         super();
 
         this.carNo = no;
         this.startLane = startLane;
         this.bluetoothMessageExtractor = new BluetoothMessageExtractor();
         this.carMessageGateway = new CarMessageGateway();
-        this.positionCalculator = new PositionCalculator();
+        this.positionCalculator = new PositionCalculator(trackConfiguration);
     }
 
     updateLocation(positionUpdateMessage) {

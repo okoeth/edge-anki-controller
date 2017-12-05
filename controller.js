@@ -28,6 +28,7 @@ var kafka_factory = require('./kafka/kafka-factory');
 var kafka = undefined;
 var Car = require('./anki/car');
 var TrackScanner = require('./anki/track-scanner');
+var TrackConfigurationLoader = require('./anki/track-configuration-loader');
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
@@ -68,40 +69,42 @@ config.read(options['config'], function (carNo, carId, startlane) {
 		}
 	});
 
-	//setup noble
-	if (options['noble']) {
-		noble = noble_factory.create(options['noble'], carId);
-	} else {
-		noble = noble_factory.create("noble", carId);
-	}
-	lane = startlane;
+    new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function(trackConfiguration) {
+        //setup noble
+        if (options['noble']) {
+            noble = noble_factory.create(options['noble'], carId, trackConfiguration);
+        } else {
+            noble = noble_factory.create("noble", carId, trackConfiguration);
+        }
+        lane = startlane;
 
 
-	console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
-	noble.startScanning();
-	setTimeout(function () {
-		noble.stopScanning();
-	}, 2000);
+        console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
+        noble.startScanning();
+        setTimeout(function () {
+            noble.stopScanning();
+        }, 2000);
 
-	noble.on('discover', function (peripheral) {
-		console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
-		if (peripheral.id === carId) {
-			noble.stopScanning();
+        noble.on('discover', function (peripheral) {
+            console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
+            if (peripheral.id === carId) {
+                noble.stopScanning();
 
-			var advertisement = peripheral.advertisement;
-			var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
-			if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
-				console.log('INFO: Car discovered. ID: ' + peripheral.id);
-				car = new Car(carNo, startlane);
-				car.setPeripheral(peripheral);
+                var advertisement = peripheral.advertisement;
+                var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
+                if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
+                    console.log('INFO: Car discovered. ID: ' + peripheral.id);
+                    car = new Car(carNo, startlane, trackConfiguration);
+                    car.setPeripheral(peripheral);
 
-				// When car gets new message
-				car.on('messageReceived', function(message) {
-                    kafka.sendMessage(JSON.stringify(message));
-				});
-			}
-		}
-	});
+                    // When car gets new message
+                    car.on('messageReceived', function(message) {
+                        kafka.sendMessage(JSON.stringify(message));
+                    });
+                }
+            }
+        });
+    });
 });
 
 ////////////////////////////////////////////////////////////////////////////////

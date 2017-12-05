@@ -42,7 +42,7 @@ For running Kafka in Docker see TODO
 
 ### Configuration of Anki track
 
-The controller reads the anki track configuration from Github (https://github.com/cloudwan/edge-anki-config). This configuration is used to translate the tile IDs from the Anki IDs (where duplicates can occur) to our unique internal IDs.
+You can create a configuration file with the track scanner. Simply run the command scan <no_of_tiles> when you started controller.js. <no_of_tiles> should be set to the number of tiles that you have on your track.
 
 ## Running locally
 The service can be started locally by running
@@ -66,11 +66,12 @@ When running in mocked mode, the service will read the configuration file from G
 
 ## Command line arguments
 
-| Argument | Short form | Description                              |
-| -------- | ---------- | ---------------------------------------- |
-| --config | -c         | Sets the car configuration. Default is config-car1.properties. |
-| --kafka  | -k         | Sets kafka. Could be mock or anything else to use kafka as default. |
-| --noble  | -n         | Sets noble. Could be mock or anything else to use noble as default. |
+| Argument      | Short form | Description                              |
+| ------------- | ---------- | ---------------------------------------- |
+| --config      | -c         | Sets the car configuration. Default is config-car1.properties. |
+| --kafka       | -k         | Sets kafka. Could be mock or anything else to use kafka as default. |
+| --noble       | -n         | Sets noble. Could be mock or anything else to use noble as default. |
+| --trackConfig | -t         | Sets the track configuration. The scanner create a file under ./track-config.json |
 
 ## References
 

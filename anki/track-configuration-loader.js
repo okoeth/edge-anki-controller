@@ -24,33 +24,38 @@ var fs = require('fs');
 class TrackConfigurationLoader {
 
     constructor(configurationPath) {
-        this.github_config_url = process.env.EDGE_GITHUB_URL;
-        if (this.github_config_url==null){
-            console.log('Using https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json as default configuration repository');
-            this.github_config_url='https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json'
-        }
+        console.log('Using ' + configurationPath + ' as configuration repository');
+        this.configPath = configurationPath;
     }
 
     getTrackConfig(callback) {
+
+        var that = this;
         if(!this.trackConfiguration) {
-            request({ url: this.github_config_url, json: true}, function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    console.log("Imported track configuration successfully");
+            if(this.configPath.indexOf('http') > -1) {
+                request({url: this.configPath, json: true}, function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        console.log("Imported track configuration successfully");
 
-                    this.trackConfiguration = [];
-                    for(var index in body) {
-                        var tile = body[index];
-                        this.trackConfiguration.push(new Tile(tile.id, tile.real_tile_id, tile.type));
+                        that.trackConfiguration = [];
+                        for (var index in body) {
+                            var tile = body[index];
+                            that.trackConfiguration.push(new Tile(tile.id, tile.real_tile_id, tile.type));
+                        }
+
+                        if (callback !== undefined)
+                            callback(that.trackConfiguration)
+
+                    } else {
+                        console.log("Error loading track configuration");
                     }
-
-                    if(callback !== undefined)
-                        callback(this.trackConfiguration)
-                } else {
-                    console.log("Error loading track configuration");
-                }
-            });
-        }
-        else {
+                });
+            } else {
+                this.trackConfiguration = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+                if (callback !== undefined)
+                    callback(this.trackConfiguration)
+            }
+        } else {
             if(callback !== undefined)
                 callback(this.trackConfiguration)
         }
