@@ -124,7 +124,7 @@ cli.on('line', function (cmd) {
 		commandArray = cmd.split(' ');
 		var countTiles = 0;
 		if (commandArray.length > 0) {
-			countTiles = commandArray[1];
+			countTiles = parseInt(commandArray[1]);
 		}
 
 		if(countTiles > 0) {

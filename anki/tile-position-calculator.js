@@ -63,7 +63,7 @@ class TilePositionCalculator {
                         return [this.trackConfiguration[normalizedIndex].id];
                 }
                 index++;
-                if(index % this.trackConfiguration === 0)
+                if(index % this.trackConfiguration.length === 0)
                     loopsCompleted++;
             }
         }

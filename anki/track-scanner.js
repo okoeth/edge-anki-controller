@@ -25,31 +25,69 @@ class TrackScanner {
 
     constructor(car) {
         this.car = car;
+
+        this.tiles = {};
+        this.tileIndex = 0;
+        this.transitionReceived = true;
+        this.currentLane = 1;
+        this.currentCycle = 0;
+        this.countTiles = 0;
+    }
+
+
+
+    messageReceived(message) {
+        var that = this;
+        if(message instanceof PositionUpdateMessage) {
+            console.log("INFO: Scanning position update message");
+
+            if(this.transitionReceived) {
+                this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.realPieceId, "UNKNOWN");
+                this.tiles[this.tileIndex]["lane" + this.currentLane][message.pieceLocation] = message.pieceLocation;
+                this.transitionReceived = false;
+            }
+            //already seen the tile
+            else {
+                this.tiles[this.tileIndex]["lane" + this.currentLane][message.pieceLocation] = message.pieceLocation;
+            }
+        }
+        else if(message instanceof TransitionUpdateMessage) {
+            console.log("INFO: Scanning transition update message");
+            this.transitionReceived = true;
+            this.tileIndex++;
+        }
+
+        if(this.tileIndex >= this.countTiles) {
+            this.tileIndex = 0;
+            this.currentCycle++;
+
+            if(this.currentCycle >= 2) {
+                this.currentLane++;
+                //Switch lanes
+                this.currentCycle = 0;
+
+                if(this.currentLane > 4)
+                    console.log("INFO: Scanning completed");
+                else
+                    that.car.sendCommand("offset -64");
+
+
+            }
+        }
+
+        console.log("INFO: Current scanned config: " + JSON.stringify(this.tiles));
     }
 
     scanTrack(countTiles) {
         //Let the car drive slowly (150)
         this.car.sendCommand("s 150");
 
-        var tiles = [];
-        var tileIndex = 0;
-        var transitionReceived = true;
+        console.log('INFO: Starting scan');
 
+        this.countTiles = countTiles;
 
         //Get the position and transition messages
-        this.car.on('messageReceived', function(message) {
-            if(message instanceof PositionUpdateMessage) {
-                console.log("Position update message");
-
-                if(transitionReceived) {
-                    tiles.push(new Tile(tileIndex, message.realPieceId, "UNKNOWN"));
-                }
-            }
-            else if(message instanceof TransitionUpdateMessage) {
-                console.log("Transition update message");
-            }
-            tileIndex++;
-        });
+        this.car.on('messageReceived', this.bind);
 
 
 

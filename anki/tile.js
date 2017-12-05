@@ -23,6 +23,10 @@ class Tile {
        this.id = id;
        this.realId = realId;
        this.type = type;
+       this.lane1 = {};
+       this.lane2 = {};
+       this.lane3 = {};
+       this.lane4 = {};
     }
 }
 

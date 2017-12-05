@@ -35,6 +35,10 @@ class CarMock {
         this.interval = setInterval(this.sendLocalizationPositionUpdate.bind(this), 5000)
     }
 
+    sendTransitionUpdate() {
+        this.readCaracteristicsMock.mockReadFromDevice(this.createTransitionMessage());
+    }
+
     sendPingMessage() {
         var pingMessage = new Buffer(4);
         pingMessage.writeUInt8(0x01, 0);
@@ -48,10 +52,37 @@ class CarMock {
         var tile = this.trackConfiguration[this.trackTileIndex];
         this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId));
 
+        this.sendTransitionUpdate();
+
         this.trackTileIndex++;
         if(this.trackTileIndex >= this.trackConfiguration.length-1) {
             this.trackTileIndex = 0;
         }
+    }
+
+    createTransitionMessage() {
+        //<Buffer 12 29 00 00 02 2b 55 c2 00 ff 81 46 00 00 00 00 00 25 32>
+        var transitionMessage = new Buffer(19);
+        transitionMessage.writeUInt8(0x12, 0);
+        transitionMessage.writeUInt8(0x29, 1);
+        transitionMessage.writeUInt8(0x00, 2);
+        transitionMessage.writeUInt8(0x00, 3);
+        transitionMessage.writeUInt8(0x02, 4);
+        transitionMessage.writeUInt8(0x2b, 5);
+        transitionMessage.writeUInt8(0x55, 6);
+        transitionMessage.writeUInt8(0xc2, 7);
+        transitionMessage.writeUInt8(0x00, 8);
+        transitionMessage.writeUInt8(0xff, 9);
+        transitionMessage.writeUInt8(0x81, 10);
+        transitionMessage.writeUInt8(0x46, 11);
+        transitionMessage.writeUInt8(0x00, 12);
+        transitionMessage.writeUInt8(0x00, 13);
+        transitionMessage.writeUInt8(0x00, 14);
+        transitionMessage.writeUInt8(0x00, 15);
+        transitionMessage.writeUInt8(0x00, 16);
+        transitionMessage.writeUInt8(0x25, 17);
+        transitionMessage.writeUInt8(0x32, 18);
+        return transitionMessage;
     }
 
     createPositionMessage(tileId) {
