@@ -49,8 +49,8 @@ class BluetoothMessageExtractor {
         }
         else if (messageId == '27') {
             // example: <Buffer 03 1b 50 0f>
-            var catBatteryLevel = data.readUInt16LE(2);
-            return new BatteryMessage(messageId, MessageNames.BATTERY_LEVEL, messageTimestamp, catBatteryLevel);
+            var carBatteryLevel = data.readUInt16LE(2);
+            return new BatteryMessage(messageId, MessageNames.BATTERY_LEVEL, messageTimestamp, carBatteryLevel);
         }
 
         else if (messageId == '39') {

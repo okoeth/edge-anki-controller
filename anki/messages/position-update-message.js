@@ -29,7 +29,7 @@ class PositionUpdateMessage extends CarMessage {
         this.carSpeed = carSpeed;
         //laneNo has to be calculated
         this.laneNo = null;
-        this.tileType = null;
+        this.posTileType = null;
         //internal position has to be calculated
         this.posOptions = [];
     }
