@@ -103,11 +103,11 @@ class Car extends EventEmitter {
                                                 that.updateLocation(message);
                                             }
 
-                                            that.emit('messageReceived', that.generateJsonMessage(message));
+                                            that.emit('messageReceived', that.addFieldsToMessage(message));
                                         });
                                     }
                                     // Write characteristic => ignore
-                                    if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
+                                    else if (characteristic.uuid == 'be15bee16186407e83810bd89c4d8df4') {
                                         console.log('INFO: Write characteristic');
                                         that.carMessageGateway.setWriteCharacteristics(characteristic);
                                         that.initCar();
@@ -146,9 +146,9 @@ class Car extends EventEmitter {
         this.carMessageGateway.sendCommand(cmd);
     }
 
-    generateJsonMessage(message) {
+    addFieldsToMessage(message) {
         message["carNo"] = this.carNo;
-        return JSON.stringify(message);
+        return message;
     }
 
     disconnect() {

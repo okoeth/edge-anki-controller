@@ -92,7 +92,7 @@ config.read(options['config'], function (carNo, carId, startlane) {
 
 				// When car gets new message
 				car.on('messageReceived', function(message) {
-                    kafka.sendMessage(message);
+                    kafka.sendMessage(JSON.stringify(message));
 				});
 			}
 		}
@@ -118,10 +118,10 @@ cli.on('line', function (cmd) {
 				console.log(data);
 			});
 	}
-	else if(cmd == 'scan') {
+	else if(cmd.indexOf('scan') > -1) {
 		console.log("INFO: Scan command from CLI");
         var commandArray;
-		commandArray = command.split(' ');
+		commandArray = cmd.split(' ');
 		var countTiles = 0;
 		if (commandArray.length > 0) {
 			countTiles = commandArray[1];

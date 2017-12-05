@@ -16,6 +16,10 @@
 // FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
+var prepareMessages = require('../prepareMessages.js')();
+var PositionUpdateMessage = require('./messages/position-update-message');
+var TransitionUpdateMessage = require('./messages/transition-update-message');
+var Tile = require('./tile');
 
 class TrackScanner {
 
@@ -25,9 +29,30 @@ class TrackScanner {
 
     scanTrack(countTiles) {
         //Let the car drive slowly (150)
+        this.car.sendCommand("s 150");
+
+        var tiles = [];
+        var tileIndex = 0;
+        var transitionReceived = true;
 
 
         //Get the position and transition messages
+        this.car.on('messageReceived', function(message) {
+            if(message instanceof PositionUpdateMessage) {
+                console.log("Position update message");
+
+                if(transitionReceived) {
+                    tiles.push(new Tile(tileIndex, message.realPieceId, "UNKNOWN"));
+                }
+            }
+            else if(message instanceof TransitionUpdateMessage) {
+                console.log("Transition update message");
+            }
+            tileIndex++;
+        });
+
+
+
 
         //Build up track configuration structure
     }
