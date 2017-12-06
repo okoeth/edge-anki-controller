@@ -25,8 +25,9 @@ var fs = require('fs');
 
 class TrackScanner {
 
-    constructor(car) {
+    constructor(car, filename) {
         this.car = car;
+        this.filename = filename;
 
         this.tiles = {};
         this.tileIndex = 0;
@@ -79,7 +80,7 @@ class TrackScanner {
                     }
 
                     else
-                        that.car.sendCommand("c " + this.laneOffsets[this.currentLane-1]);
+                        that.car.sendCommand("c " + this.currentLane);
 
 
                 }
@@ -104,7 +105,7 @@ class TrackScanner {
     }
 
     configCompleted() {
-        fs.writeFile('track-config.json', JSON.stringify(this.tiles), function (err) {
+        fs.writeFile(this.filename, JSON.stringify(this.tiles), function (err) {
             if (err) return console.log(err);
             console.log("Configuration file written");
         })

@@ -42,13 +42,13 @@ class TilePositionCalculator {
         //we know where the car was previously,
         //we search the next tile with the right anki tile id
         if(previousTileIndex > -1) {
-            var previousTileId = this.trackConfiguration[previousTileIndex];
+            var previousTileId = this.trackConfiguration[previousTileIndex].id;
             var previousTileFound = false;
             var index = 0;
             var loopsCompleted = 0;
 
             while(true) {
-                var normalizedIndex = index % this.trackConfiguration.length;
+                var normalizedIndex = index % Object.keys(this.trackConfiguration).length;
 
                 //Safety first, should anyway not happen
                 if(loopsCompleted >= 2) {
@@ -58,8 +58,9 @@ class TilePositionCalculator {
                 //We found the tile
                 if(this.trackConfiguration[normalizedIndex].id === previousTileId) {
                     previousTileFound = true;
-                } else {
-                    if (previousTileFound && this.trackConfiguration[normalizedIndex].realId == ankiTileId)
+                }
+
+                if (previousTileFound && this.trackConfiguration[normalizedIndex].realId == ankiTileId) {
                         return [ new PosOption(this.trackConfiguration[normalizedIndex].id, 1)];
                 }
                 index++;
@@ -75,23 +76,43 @@ class TilePositionCalculator {
                 if (tile.realId === ankiTileId)
                     possibleTiles.push(new PosOption(tile.id, 1));
             }
+
+            //set equal probabilities for all tiles
+            for(var index = 0; index < possibleTiles.length; index++) {
+                possibleTiles[index].optProbability = 1/possibleTiles.length;
+            }
             return possibleTiles;
         }
     }
 
     getNextTileIndex(currentTileIndex) {
         var newTileIndex = currentTileIndex+1;
-        if(newTileIndex == this.trackConfiguration.length) {
+        if(newTileIndex == Object.keys(this.trackConfiguration).length) {
             newTileIndex = 0;
         }
         return newTileIndex;
     }
 
     getIndexFromTileId(tileId) {
-        for(var index = 0; index < this.trackConfiguration.length; index++) {
-            if(this.trackConfiguration[index].id == tileId)
-                return index;
+        for(var key in this.trackConfiguration) {
+            if(this.trackConfiguration[key].id == tileId)
+                return parseInt(key);
         }
+    }
+
+    getLane(tileIndex, posLocation) {
+        var tile = this.trackConfiguration[tileIndex];
+
+        if(tile.lane1[posLocation] !== undefined) {
+            return 1;
+        } else if(tile.lane2[posLocation] !== undefined) {
+            return 2;
+        } else if(tile.lane3[posLocation] !== undefined) {
+            return 3;
+        } else if(tile.lane4[posLocation] !== undefined) {
+            return 4;
+        }
+        return undefined;
     }
 }
 

@@ -118,13 +118,17 @@ class Car extends EventEmitter {
                                                     message.posOptions =
                                                         that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
 
-                                                    if(message.posOptions.length == 1)
-                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0]);
+                                                    if(message.posOptions.length == 1) {
+                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                        message.laneNo = that.positionCalculator.getLane(that.currentTileIndex, message.posLocation);
+                                                    }
+
 
                                                     that.updateLocation(message);
                                                 }
                                                 else if(message instanceof TransitionUpdateMessage) {
-                                                    that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                    if(that.currentTileIndex > -1)
+                                                        that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
                                                 }
                                                 else if(message instanceof VehicleDelocalizedMessage) {
                                                     that.resetLocation();

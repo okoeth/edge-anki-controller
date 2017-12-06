@@ -20,6 +20,7 @@
 const request = require('request');
 const Tile = require('./tile');
 var fs = require('fs');
+const TrackConfiguration = require('./track-configuration');
 
 class TrackConfigurationLoader {
 
@@ -51,9 +52,15 @@ class TrackConfigurationLoader {
                     }
                 });
             } else {
-                this.trackConfiguration = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
-                if (callback !== undefined)
-                    callback(this.trackConfiguration)
+                if(!fs.existsSync(this.configPath)) {
+                    console.log("INFO: Track configuration does not exist. Please scan with scan <count-tiles> command");
+                    callback(new TrackConfiguration([]));
+                }
+                else {
+                    this.trackConfiguration = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
+                    if (callback !== undefined)
+                        callback(this.trackConfiguration)
+                }
             }
         } else {
             if(callback !== undefined)

@@ -136,7 +136,7 @@ cli.on('line', function (cmd) {
 		}
 
 		if(countTiles > 0) {
-            var trackScanner = new TrackScanner(car);
+            var trackScanner = new TrackScanner(car, options['trackConfig']);
             trackScanner.scanTrack(countTiles);
         }
 	}

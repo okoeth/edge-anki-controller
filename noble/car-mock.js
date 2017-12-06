@@ -23,14 +23,9 @@ class CarMock {
 
     constructor(readCaracteristicsMock, trackConfiguration) {
         this.readCaracteristicsMock = readCaracteristicsMock;
-        this.trackConfiguration = undefined;
+        this.trackConfiguration = trackConfiguration;
         this.trackTileIndex = 0;
 
-        setTrackConfiguration(trackConfiguration);
-    }
-
-    setTrackConfiguration(trackConfiguration) {
-        this.trackConfiguration = trackConfiguration;
         this.interval = setInterval(this.sendLocalizationPositionUpdate.bind(this), 5000)
     }
 
@@ -48,13 +43,18 @@ class CarMock {
     }
 
     sendLocalizationPositionUpdate() {
-        var tile = this.trackConfiguration[this.trackTileIndex];
-        this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId));
-
         this.sendTransitionUpdate();
+        var tile = this.trackConfiguration[this.trackTileIndex];
+        var tilePosition = undefined;
+        for(var key in tile.lane4) {
+            tilePosition = tile.lane4[key];
+            break;
+        }
+
+        this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId, tilePosition));
 
         this.trackTileIndex++;
-        if(this.trackTileIndex >= this.trackConfiguration.length-1) {
+        if(this.trackTileIndex >= Object.keys(this.trackConfiguration).length-1) {
             this.trackTileIndex = 0;
         }
     }
@@ -84,11 +84,12 @@ class CarMock {
         return transitionMessage;
     }
 
-    createPositionMessage(tileId) {
+    createPositionMessage(tileId, tilePosition) {
         var localizationMessage = new Buffer(17);
         localizationMessage.writeUInt8(0x10, 0);
         localizationMessage.writeUInt8(0x27, 1);
-        localizationMessage.writeUInt8(0x21, 2);
+        var positionHex = tilePosition.toString(16);
+        localizationMessage.writeUInt8("0x" + positionHex, 2);
         //convert int to hex
         var hexValue = tileId.toString(16);
         localizationMessage.writeUInt8("0x" + hexValue, 3);

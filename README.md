@@ -42,7 +42,7 @@ For running Kafka in Docker see TODO
 
 ### Configuration of Anki track
 
-You can create a configuration file with the track scanner. Simply run the command scan <no_of_tiles> when you started controller.js. <no_of_tiles> should be set to the number of tiles that you have on your track.
+You can create a configuration file with the track scanner. Simply run the command scan <no_of_tiles> when you started controller.js. <no_of_tiles> should be set to the number of tiles that you have on your track. You can change the filename that will be generated with -t option (view Command line argument).
 
 ## Running locally
 The service can be started locally by running
@@ -71,7 +71,7 @@ When running in mocked mode, the service will read the configuration file from G
 | --config      | -c         | Sets the car configuration. Default is config-car1.properties. |
 | --kafka       | -k         | Sets kafka. Could be mock or anything else to use kafka as default. |
 | --noble       | -n         | Sets noble. Could be mock or anything else to use noble as default. |
-| --trackConfig | -t         | Sets the track configuration. The scanner create a file under ./track-config.json |
+| --trackConfig | -t         | Sets the track configuration. The scanner creates a file under the path provided in trackConfig parameter. |
 
 ## References
 
