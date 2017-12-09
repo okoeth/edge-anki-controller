@@ -99,19 +99,85 @@ class TilePositionCalculator {
         }
     }
 
-    getLane(tileIndex, posLocation) {
-        var tile = this.trackConfiguration[tileIndex];
+    /**
+     * Calculates the lane based on all possible locations
+     * If the possible locations imply different lanes,
+     * undefined is returned
+     * @param posOptions The possible tile numbers of the car
+     * @param posLocation The location within a tile sent by anki
+     * @returns {undefined}
+     */
+    getLane(posOptions, posLocation) {
+        var proposedLane = undefined;
+        var positionPrefix = this.getPositionPrefix(posLocation);
 
-        if(tile.lane1[posLocation] !== undefined) {
-            return 1;
-        } else if(tile.lane2[posLocation] !== undefined) {
-            return 2;
-        } else if(tile.lane3[posLocation] !== undefined) {
-            return 3;
-        } else if(tile.lane4[posLocation] !== undefined) {
-            return 4;
+        for(var index in posOptions) {
+            var tile = this.trackConfiguration[posOptions[index].optTileNo];
+            var currentLane = undefined;
+
+            //First try to find tile directly
+            if(tile.lane1[posLocation] !== undefined) {
+                currentLane = 1;
+            } else if(tile.lane2[posLocation] !== undefined) {
+                currentLane = 2;
+            } else if(tile.lane3[posLocation] !== undefined) {
+                currentLane = 3;
+            } else if(tile.lane4[posLocation] !== undefined) {
+                currentLane = 4;
+            }
+
+            //Then try to find by prefix
+            if(currentLane === undefined) {
+                var lane1TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane1));
+                var lane2TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane2));
+                var lane3TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane3));
+                var lane4TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane4));
+
+                if (lane1TilePositionPrefix === positionPrefix) {
+                    currentLane = 1;
+                } else if (lane2TilePositionPrefix === positionPrefix) {
+                    currentLane = 2;
+                } else if (lane3TilePositionPrefix === positionPrefix) {
+                    currentLane = 3;
+                } else if (lane4TilePositionPrefix === positionPrefix) {
+                    currentLane = 4;
+                }
+            }
+
+            if(!proposedLane) {
+                proposedLane = currentLane;
+            }
+            else if(proposedLane !== currentLane)
+                return undefined;
         }
-        return undefined;
+        return proposedLane;
+    }
+
+    /***
+     * Get the median item of the positions
+     * @param positions (tile positions)
+     * @returns {*}
+     */
+    getMedianPositionItem(positions) {
+        var medianIndex = Math.round((Object.keys(positions).length / 2))-1;
+        if(medianIndex < 0)
+            medianIndex = 0;
+
+        var currentIndex = 0;
+        for(var laneKey in positions) {
+            if(currentIndex === medianIndex)
+                return positions[laneKey];
+            currentIndex++;
+        }
+    }
+
+    getPositionPrefix(position) {
+        var posLocationString = position.toString();
+        var lanePrefix = posLocationString[0];
+        if(posLocationString.length === 1) {
+            lanePrefix = '0';
+        }
+        return lanePrefix
     }
 }
 

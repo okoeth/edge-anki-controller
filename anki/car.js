@@ -120,9 +120,13 @@ class Car extends EventEmitter {
 
                                                     if(message.posOptions.length == 1) {
                                                         that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
-                                                        message.laneNo = that.positionCalculator.getLane(that.currentTileIndex, message.posLocation);
                                                     }
+                                                    message.laneNo = that.positionCalculator.getLane(message.posOptions, message.posLocation);
 
+                                                    //If laneNo not found, take the old one
+                                                    if(!message.laneNo && !that.laneNo) {
+                                                        message.laneNo = that.laneNo;
+                                                    }
 
                                                     that.updateLocation(message);
                                                 }
