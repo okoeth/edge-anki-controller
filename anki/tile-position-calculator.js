@@ -179,6 +179,19 @@ class TilePositionCalculator {
         }
         return lanePrefix
     }
+
+    getFirstTilePosition(tile, laneNo) {
+        var positions = tile["lane" + laneNo];
+
+        for(var key in positions)  {
+            return key;
+        }
+    }
+
+    getTileByIndex(tileIndex) {
+        return this.trackConfiguration[tileIndex];
+    }
+
 }
 
 module.exports = TilePositionCalculator;

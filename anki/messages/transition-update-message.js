@@ -18,12 +18,12 @@
 // DEALINGS IN THE SOFTWARE.
 
 var CarMessage = require('./car-message');
+var PositionUpdateMessage = require('./position-update-message');
 
-class TransitionUpdateMessage extends CarMessage {
+class TransitionUpdateMessage extends PositionUpdateMessage {
 
     constructor(msgID, msgName, msgTimestamp, laneOffset) {
-        super(msgID, msgName, msgTimestamp);
-        this.laneOffset = laneOffset;
+        super(msgID, msgName, msgTimestamp, undefined, undefined, laneOffset, undefined);
     }
 }
 

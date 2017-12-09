@@ -25,6 +25,7 @@ const PositionUpdateMessage = require('./messages/position-update-message');
 const VehicleDelocalizedMessage = require('./messages/vehicle-delocalized-message');
 const TransitionUpdateMessage = require('./messages/transition-update-message');
 const PositionCalculator = require("./tile-position-calculator");
+const PosOption = require("./pos-option");
 
 class Car extends EventEmitter {
     constructor(no, startLane, trackConfiguration) {
@@ -44,6 +45,12 @@ class Car extends EventEmitter {
         this.tileId = positionUpdateMessage.posOptions;
         this.position = positionUpdateMessage.posLocation;
         this.lastUpdateTime = positionUpdateMessage.msgTimestamp;
+        this.carSpeed = positionUpdateMessage.carSpeed;
+    }
+
+    updateTileNo(tileId, position) {
+        this.tileId = tileId;
+        this.position = position;
     }
 
     resetLocation() {
@@ -53,9 +60,8 @@ class Car extends EventEmitter {
         this.position = undefined;
         this.lastUpdateTime = undefined;
         this.currentTileIndex = -1;
+        this.carSpeed = 0;
     }
-
-
 
     setPeripheral(peripheral) {
         var that = this;
@@ -108,7 +114,23 @@ class Car extends EventEmitter {
                                             
                                             if (message !== undefined) {
                                                 console.log("INFO: Received message: " + JSON.stringify(message));
-                                                if(message instanceof PositionUpdateMessage) {
+
+                                                if(message instanceof TransitionUpdateMessage) {
+                                                    if(that.currentTileIndex > -1) {
+                                                        //Interpolate
+                                                        that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                        var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
+
+                                                        message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
+                                                        message.posTileNo = currentTile.realId;
+                                                        message.posOptions = [ new PosOption(currentTile.id, 0.75) ];
+                                                        message.laneNo = that.laneNo;
+                                                        message.carSpeed = that.carSpeed;
+
+                                                        that.updateLocation(message);
+                                                    }
+                                                }
+                                                else if(message instanceof PositionUpdateMessage) {
 
                                                     /***
                                                      * TODO: If last update was a while ago (time difference),
@@ -129,10 +151,6 @@ class Car extends EventEmitter {
                                                     }
 
                                                     that.updateLocation(message);
-                                                }
-                                                else if(message instanceof TransitionUpdateMessage) {
-                                                    if(that.currentTileIndex > -1)
-                                                        that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
                                                 }
                                                 else if(message instanceof VehicleDelocalizedMessage) {
                                                     that.resetLocation();
@@ -186,6 +204,10 @@ class Car extends EventEmitter {
         message["carNo"] = this.carNo;
         message["carID"] = this.peripheral.id;
         return message;
+    }
+
+    addPositionToMessage(message) {
+
     }
 
     disconnect() {
