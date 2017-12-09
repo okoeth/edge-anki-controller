@@ -32,7 +32,6 @@ class TilePositionCalculator {
 
     getCarPosition(ankiTileId, previousTileIndex) {
 
-        //TODO: Somehow its hanging here
         if(!this.trackConfiguration)
             return -1;
 
