@@ -41,13 +41,13 @@ class TilePositionCalculator {
         //we know where the car was previously,
         //we search the next tile with the right anki tile id
         if(previousTileIndex > -1) {
-            var previousTileId = this.trackConfiguration[previousTileIndex].id;
+            var previousTileId = this.trackConfiguration.tiles[previousTileIndex].id;
             var previousTileFound = false;
             var index = 0;
             var loopsCompleted = 0;
 
             while(true) {
-                var normalizedIndex = index % Object.keys(this.trackConfiguration).length;
+                var normalizedIndex = index % Object.keys(this.trackConfiguration.tiles).length;
 
                 //Safety first, should anyway not happen
                 if(loopsCompleted >= 2) {
@@ -55,15 +55,15 @@ class TilePositionCalculator {
                 }
 
                 //We found the tile
-                if(this.trackConfiguration[normalizedIndex].id === previousTileId) {
+                if(this.trackConfiguration.tiles[normalizedIndex].id === previousTileId) {
                     previousTileFound = true;
                 }
 
-                if (previousTileFound && this.trackConfiguration[normalizedIndex].realId == ankiTileId) {
-                        return [ new PosOption(this.trackConfiguration[normalizedIndex].id, 1)];
+                if (previousTileFound && this.trackConfiguration.tiles[normalizedIndex].realId == ankiTileId) {
+                        return [ new PosOption(this.trackConfiguration.tiles[normalizedIndex].id, 1)];
                 }
                 index++;
-                if(index % this.trackConfiguration.length === 0)
+                if(index % this.trackConfiguration.tiles.length === 0)
                     loopsCompleted++;
             }
         }
@@ -93,8 +93,8 @@ class TilePositionCalculator {
     }
 
     getIndexFromTileId(tileId) {
-        for(var key in this.trackConfiguration) {
-            if(this.trackConfiguration[key].id == tileId)
+        for(var key in this.trackConfiguration.tiles) {
+            if(this.trackConfiguration.tiles[key].id == tileId)
                 return parseInt(key);
         }
     }

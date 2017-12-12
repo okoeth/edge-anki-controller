@@ -60,7 +60,7 @@ class CarMock {
         this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId, tilePosition));
 
         this.trackTileIndex++;
-        if(this.trackTileIndex >= Object.keys(this.trackConfiguration).length-1) {
+        if(this.trackTileIndex >= Object.keys(this.trackConfiguration.tiles).length-1) {
             this.trackTileIndex = 0;
         }
     }

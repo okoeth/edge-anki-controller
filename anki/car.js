@@ -125,10 +125,13 @@ class Car extends EventEmitter {
 
                                                         message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
                                                         message.posTileNo = currentTile.realId;
+                                                        message.posTileType = currentTile.type;
                                                         message.posOptions = [ new PosOption(currentTile.id, 0.75) ];
                                                         message.laneNo = that.laneNo;
                                                         message.carSpeed = that.carSpeed;
-                                                        message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
+
+                                                        if(that.laneNo !== undefined)
+                                                            message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
 
                                                         that.updateLocation(message);
                                                     }
@@ -154,6 +157,7 @@ class Car extends EventEmitter {
                                                         that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
                                                         that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
 
+                                                        message.posTileType = that.currentTile.type;
                                                         if(message.laneNo !== undefined)
                                                             message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
                                                     }
