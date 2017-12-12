@@ -185,7 +185,7 @@ class TilePositionCalculator {
     }
 
     getFirstTilePosition(tile, laneNo) {
-        var positions = tile["lane" + laneNo];
+        var positions = tile["lane" + laneNo].positions;
 
         for(var key in positions)  {
             return key;

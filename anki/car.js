@@ -114,64 +114,66 @@ class Car extends EventEmitter {
 
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
                                             
-                                            if (message !== undefined && that.validConfiguration) {
-                                                console.log("INFO: Received message: " + JSON.stringify(message));
+                                            if (message !== undefined) {
+                                                if(that.validConfiguration) {
+                                                    console.log("INFO: Received message: " + JSON.stringify(message));
 
-                                                if(message instanceof TransitionUpdateMessage) {
-                                                    if(that.currentTileIndex > -1) {
-                                                        //Interpolate
-                                                        that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
-                                                        var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
+                                                    if (message instanceof TransitionUpdateMessage) {
+                                                        if (that.currentTileIndex > -1) {
+                                                            //Interpolate
+                                                            that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                            var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
 
-                                                        message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
-                                                        message.posTileNo = currentTile.realId;
-                                                        message.posTileType = currentTile.type;
-                                                        message.posOptions = [ new PosOption(currentTile.id, 75) ];
-                                                        message.laneNo = that.laneNo;
-                                                        message.carSpeed = that.carSpeed;
+                                                            message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
+                                                            message.posTileNo = currentTile.realId;
+                                                            message.posTileType = currentTile.type;
+                                                            message.posOptions = [new PosOption(currentTile.id, 75)];
+                                                            message.laneNo = that.laneNo;
+                                                            message.carSpeed = that.carSpeed;
 
-                                                        if(that.laneNo !== undefined)
-                                                            message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
+                                                            if (that.laneNo !== undefined)
+                                                                message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
+
+                                                            that.updateLocation(message);
+                                                        }
+                                                    }
+                                                    else if (message instanceof PositionUpdateMessage) {
+
+                                                        /***
+                                                         * TODO: If last update was a while ago (time difference),
+                                                         * don't use for calculation of internal piece id
+                                                         */
+                                                        console.log('INFO: TileID:', that.tileId);
+                                                        message.posOptions =
+                                                            that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
+
+                                                        message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
+
+                                                        //If laneNo not found, take the old one
+                                                        if (!message.laneNo && !that.laneNo) {
+                                                            message.laneNo = that.laneNo;
+                                                        }
+
+                                                        if (message.posOptions.length == 1) {
+                                                            that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                            that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
+
+                                                            message.posTileType = that.currentTile.type;
+                                                            if (message.laneNo !== undefined)
+                                                                message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
+                                                        }
+
 
                                                         that.updateLocation(message);
                                                     }
-                                                }
-                                                else if(message instanceof PositionUpdateMessage) {
-
-                                                    /***
-                                                     * TODO: If last update was a while ago (time difference),
-                                                     * don't use for calculation of internal piece id
-                                                     */
-                                                    console.log('INFO: TileID:', that.tileId);
-                                                    message.posOptions =
-                                                        that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
-
-                                                    message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
-
-                                                    //If laneNo not found, take the old one
-                                                    if(!message.laneNo && !that.laneNo) {
-                                                        message.laneNo = that.laneNo;
+                                                    else if (message instanceof VehicleDelocalizedMessage) {
+                                                        that.resetLocation();
                                                     }
 
-                                                    if(message.posOptions.length == 1) {
-                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
-                                                        that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
-
-                                                        message.posTileType = that.currentTile.type;
-                                                        if(message.laneNo !== undefined)
-                                                            message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
-                                                    }
-
-
-                                                    that.updateLocation(message);
+                                                    that.emit('messageReceived', that.addFieldsToMessage(message));
+                                                } else {
+                                                    that.emit('messageReceived', message);
                                                 }
-                                                else if(message instanceof VehicleDelocalizedMessage) {
-                                                    that.resetLocation();
-                                                }
-
-                                                that.emit('messageReceived', that.addFieldsToMessage(message));
-                                            } else {
-                                                that.emit('messageReceived', message);
                                             }
                                         });
                                     }
