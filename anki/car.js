@@ -126,7 +126,7 @@ class Car extends EventEmitter {
                                                         message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
                                                         message.posTileNo = currentTile.realId;
                                                         message.posTileType = currentTile.type;
-                                                        message.posOptions = [ new PosOption(currentTile.id, 0.75) ];
+                                                        message.posOptions = [ new PosOption(currentTile.id, 75) ];
                                                         message.laneNo = that.laneNo;
                                                         message.carSpeed = that.carSpeed;
 

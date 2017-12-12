@@ -78,7 +78,7 @@ class TilePositionCalculator {
 
             //set equal probabilities for all tiles
             for(var index = 0; index < possibleTiles.length; index++) {
-                possibleTiles[index].optProbability = 1/possibleTiles.length;
+                possibleTiles[index].optProbability = ((1/possibleTiles.length)*100)|0;
             }
             return possibleTiles;
         }

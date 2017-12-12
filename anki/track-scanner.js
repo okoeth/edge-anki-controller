@@ -65,11 +65,11 @@ class TrackScanner {
     }
 
     createStraightSizes(tile) {
-        this.createLaneSizes(tile, "56", "56", "56", "56");
+        this.createLaneSizes(tile, 560, 560, 560, 560);
     }
 
     createCurveSizes(tile) {
-        this.createLaneSizes(tile, "33", "43", "50", "56");
+        this.createLaneSizes(tile, 330, 430, 500, 560);
     }
 
     messageReceived(message) {
