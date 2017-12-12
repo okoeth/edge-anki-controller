@@ -26,6 +26,8 @@ class CarMock {
         this.trackConfiguration = trackConfiguration;
         this.trackTileIndex = 0;
 
+        this.validConfiguration = !this.trackConfiguration.outdated;
+
         this.interval = setInterval(this.sendLocalizationPositionUpdate.bind(this), 5000)
     }
 
@@ -43,12 +45,16 @@ class CarMock {
     }
 
     sendLocalizationPositionUpdate() {
+
         this.sendTransitionUpdate();
-        var tile = this.trackConfiguration[this.trackTileIndex];
+        var tile = this.trackConfiguration.tiles[this.trackTileIndex];
         var tilePosition = undefined;
-        for(var key in tile.lane4) {
-            tilePosition = tile.lane4[key];
-            break;
+
+        if(this.validConfiguration) {
+            for(var key in tile.lane4.positions) {
+                tilePosition = tile.lane4.positions[key];
+                break;
+            }
         }
 
         this.readCaracteristicsMock.mockReadFromDevice(this.createPositionMessage(tile.realId, tilePosition));

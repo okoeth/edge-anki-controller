@@ -44,7 +44,7 @@ module.exports = function() {
           console.log('Configuration read from '+propertiesFileName+': ', cfg);
 
           if(callback !== undefined)
-              callback(cfg.carno, cfg.carid, cfg.startlane);
+              callback(parseInt(cfg.carno), cfg.carid, cfg.startlane);
         });
     }
   }

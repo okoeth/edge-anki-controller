@@ -21,6 +21,7 @@ var PositionUpdateMessage = require('./messages/position-update-message');
 var TransitionUpdateMessage = require('./messages/transition-update-message');
 var Tile = require('./tile');
 var TrackConfiguration = require('./track-configuration');
+var Lane = require('./lane');
 var fs = require('fs');
 
 class TrackScanner {
@@ -36,31 +37,84 @@ class TrackScanner {
         this.currentCycle = 0;
         this.countTiles = 0;
         this.laneOffsets = [68, 23, -23, -68];
+
+        this.knownTiles = {
+            "17": new Tile(undefined, 17, "CURVE"),
+            "20": new Tile(undefined, 20, "CURVE"),
+            "40": new Tile(undefined, 40, "STRAIGHT"),
+            "18": new Tile(undefined, 18, "CURVE"),
+            "23": new Tile(undefined, 23, "CURVE"),
+            "39": new Tile(undefined, 39, "STRAIGHT")
+        }
+
+        this.createCurveSizes(this.knownTiles["17"]);
+        this.createCurveSizes(this.knownTiles["20"]);
+        this.createCurveSizes(this.knownTiles["18"]);
+        this.createCurveSizes(this.knownTiles["23"]);
+        this.createStraightSizes(this.knownTiles["40"]);
+        this.createStraightSizes(this.knownTiles["39"]);
     }
 
 
 
+    createLaneSizes(tile, laneSize1, laneSize2, laneSize3, laneSize4) {
+        tile.lane1 = new Lane(laneSize1);
+        tile.lane2 = new Lane(laneSize2);
+        tile.lane3 = new Lane(laneSize3);
+        tile.lane4 = new Lane(laneSize4);
+    }
+
+    createStraightSizes(tile) {
+        this.createLaneSizes(tile, "56", "56", "56", "56");
+    }
+
+    createCurveSizes(tile) {
+        this.createLaneSizes(tile, "33", "43", "50", "56");
+    }
+
     messageReceived(message) {
         var that = this;
         if(message !== undefined) {
-            if (message instanceof PositionUpdateMessage) {
+            if (message instanceof TransitionUpdateMessage) {
+                console.log("INFO: Scanning transition update message");
+                this.transitionReceived = true;
+                this.tileIndex++;
+            }
+            else if (message instanceof PositionUpdateMessage) {
                 console.log("INFO: Scanning position update message");
 
                 if (this.transitionReceived) {
-                    if(this.tiles[this.tileIndex] === undefined)
-                        this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
-                    this.tiles[this.tileIndex]["lane" + this.currentLane][message.posLocation] = message.posLocation;
+                    var knownTile = undefined;
+                    if(this.tiles[this.tileIndex] === undefined) {
+                        knownTile = this.knownTiles[message.posTileNo];
+
+                        if(!knownTile)
+                            this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
+                        else
+                            this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
+                    } else {
+                        knownTile = this.knownTiles[message.posTileNo];
+                    }
+
+                    var laneKey = "lane" + this.currentLane;
+
+                    //TODO: Refactor all usages of configuration / tiles / lanes
+                    if(!knownTile) {
+                        //Tile not known, we have no mm info
+                    } else {
+                        //Set lane size and add position
+                        var knownLane = knownTile[laneKey];
+                        this.tiles[this.tileIndex][laneKey] = knownLane;
+                        this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
+                    }
+
                     this.transitionReceived = false;
                 }
                 //already seen the tile
                 else {
-                    this.tiles[this.tileIndex]["lane" + this.currentLane][message.posLocation] = message.posLocation;
+                    var laneKey = "lane" + this.currentLane;
+                    this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation)
                 }
-            }
-            else if (message instanceof TransitionUpdateMessage) {
-                console.log("INFO: Scanning transition update message");
-                this.transitionReceived = true;
-                this.tileIndex++;
             }
 
             if (this.tileIndex >= this.countTiles) {
@@ -81,8 +135,6 @@ class TrackScanner {
 
                     else
                         that.car.sendCommand("c " + this.currentLane);
-
-
                 }
             }
 
@@ -105,7 +157,7 @@ class TrackScanner {
     }
 
     configCompleted() {
-        fs.writeFile(this.filename, JSON.stringify(this.tiles), function (err) {
+        fs.writeFile(this.filename, JSON.stringify(new TrackConfiguration(this.tiles)), function (err) {
             if (err) return console.log(err);
             console.log("Configuration file written");
         })

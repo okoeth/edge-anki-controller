@@ -69,8 +69,8 @@ class TilePositionCalculator {
         }
         //We have no info about our last position, get all possibilities
         else {
-            for (var index in this.trackConfiguration) {
-                var tile = this.trackConfiguration[index];
+            for (var index in this.trackConfiguration.tiles) {
+                var tile = this.trackConfiguration.tiles[index];
 
                 if (tile.realId === ankiTileId)
                     possibleTiles.push(new PosOption(tile.id, 1));
@@ -86,7 +86,7 @@ class TilePositionCalculator {
 
     getNextTileIndex(currentTileIndex) {
         var newTileIndex = currentTileIndex+1;
-        if(newTileIndex == Object.keys(this.trackConfiguration).length) {
+        if(newTileIndex == Object.keys(this.trackConfiguration.tiles).length) {
             newTileIndex = 0;
         }
         return newTileIndex;
@@ -99,6 +99,10 @@ class TilePositionCalculator {
         }
     }
 
+    getLaneLength(tile, laneNo) {
+        return tile["lane" + laneNo].sizeMM;
+    }
+
     /**
      * Calculates the lane based on all possible locations
      * If the possible locations imply different lanes,
@@ -107,31 +111,31 @@ class TilePositionCalculator {
      * @param posLocation The location within a tile sent by anki
      * @returns {undefined}
      */
-    getLane(posOptions, posLocation) {
+    getLaneNo(posOptions, posLocation) {
         var proposedLane = undefined;
         var positionPrefix = this.getPositionPrefix(posLocation);
 
         for(var index in posOptions) {
-            var tile = this.trackConfiguration[posOptions[index].optTileNo];
+            var tile = this.trackConfiguration.tiles[posOptions[index].optTileNo];
             var currentLane = undefined;
 
             //First try to find tile directly
-            if(tile.lane1[posLocation] !== undefined) {
+            if(tile.lane1.positions[posLocation] !== undefined) {
                 currentLane = 1;
-            } else if(tile.lane2[posLocation] !== undefined) {
+            } else if(tile.lane2.positions[posLocation] !== undefined) {
                 currentLane = 2;
-            } else if(tile.lane3[posLocation] !== undefined) {
+            } else if(tile.lane3.positions[posLocation] !== undefined) {
                 currentLane = 3;
-            } else if(tile.lane4[posLocation] !== undefined) {
+            } else if(tile.lane4.positions[posLocation] !== undefined) {
                 currentLane = 4;
             }
 
             //Then try to find by prefix
-            if(currentLane === undefined) {
-                var lane1TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane1));
-                var lane2TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane2));
-                var lane3TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane3));
-                var lane4TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane4));
+            if(currentLane === undefined && !this.trackConfiguration.outdated) {
+                var lane1TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane1.positions));
+                var lane2TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane2.positions));
+                var lane3TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane3.positions));
+                var lane4TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane4.positions));
 
                 if (lane1TilePositionPrefix === positionPrefix) {
                     currentLane = 1;
@@ -189,7 +193,7 @@ class TilePositionCalculator {
     }
 
     getTileByIndex(tileIndex) {
-        return this.trackConfiguration[tileIndex];
+        return this.trackConfiguration.tiles[tileIndex];
     }
 
 }

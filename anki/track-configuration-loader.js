@@ -25,7 +25,7 @@ const TrackConfiguration = require('./track-configuration');
 class TrackConfigurationLoader {
 
     constructor(configurationPath) {
-        console.log('Using ' + configurationPath + ' as configuration repository');
+        console.log('Using ' + configurationPath + ' as configuration');
         this.configPath = configurationPath;
     }
 
@@ -33,6 +33,7 @@ class TrackConfigurationLoader {
 
         var that = this;
         if(!this.trackConfiguration) {
+            //Load config from http
             if(this.configPath.indexOf('http') > -1) {
                 request({url: this.configPath, json: true}, function (error, response, body) {
                     if (!error && response.statusCode == 200) {
@@ -52,14 +53,25 @@ class TrackConfigurationLoader {
                     }
                 });
             } else {
+                //Load config from local disc
                 if(!fs.existsSync(this.configPath)) {
-                    console.log("INFO: Track configuration does not exist. Please scan with scan <count-tiles> command");
-                    callback(new TrackConfiguration([]));
+                    console.log("WARNING: Track configuration does not exist. Please scan with scan <count-tiles> command");
+                    if (callback !== undefined)
+                        callback(new TrackConfiguration([]));
                 }
                 else {
                     this.trackConfiguration = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
-                    if (callback !== undefined)
-                        callback(this.trackConfiguration)
+
+                    if(this.trackConfiguration.version === TrackConfiguration.getCurrentVersion()) {
+                        if (callback !== undefined)
+                            callback(this.trackConfiguration)
+                    }
+                    else {
+                        console.log("WARNING: Track configuration version outdated. Please rescan with scan <count-tiles> command");
+                        this.trackConfiguration.outdated = true;
+                        if (callback !== undefined)
+                            callback(this.trackConfiguration);
+                    }
                 }
             }
         } else {

@@ -17,17 +17,20 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+var Lane = require('./lane');
+
 class Tile {
 
     constructor(id, realId, type) {
        this.id = id;
        this.realId = realId;
        this.type = type;
-       this.lane1 = {};
-       this.lane2 = {};
-       this.lane3 = {};
-       this.lane4 = {};
+       this.lane1 = undefined;
+       this.lane2 = undefined
+       this.lane3 = undefined;
+       this.lane4 = undefined;
     }
+
 }
 
 module.exports = Tile;

@@ -37,6 +37,8 @@ class Car extends EventEmitter {
         this.carMessageGateway = new CarMessageGateway();
         this.positionCalculator = new PositionCalculator(trackConfiguration);
         this.currentTileIndex = -1;
+
+        this.validConfiguration = !trackConfiguration.outdated;
     }
 
     updateLocation(positionUpdateMessage) {
@@ -112,7 +114,7 @@ class Car extends EventEmitter {
 
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
                                             
-                                            if (message !== undefined) {
+                                            if (message !== undefined && that.validConfiguration) {
                                                 console.log("INFO: Received message: " + JSON.stringify(message));
 
                                                 if(message instanceof TransitionUpdateMessage) {
@@ -126,6 +128,7 @@ class Car extends EventEmitter {
                                                         message.posOptions = [ new PosOption(currentTile.id, 0.75) ];
                                                         message.laneNo = that.laneNo;
                                                         message.carSpeed = that.carSpeed;
+                                                        message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
 
                                                         that.updateLocation(message);
                                                     }
@@ -140,15 +143,21 @@ class Car extends EventEmitter {
                                                     message.posOptions =
                                                         that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
 
-                                                    if(message.posOptions.length == 1) {
-                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
-                                                    }
-                                                    message.laneNo = that.positionCalculator.getLane(message.posOptions, message.posLocation);
+                                                    message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
 
                                                     //If laneNo not found, take the old one
                                                     if(!message.laneNo && !that.laneNo) {
                                                         message.laneNo = that.laneNo;
                                                     }
+
+                                                    if(message.posOptions.length == 1) {
+                                                        that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                        that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
+
+                                                        if(message.laneNo !== undefined)
+                                                            message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
+                                                    }
+
 
                                                     that.updateLocation(message);
                                                 }
@@ -157,6 +166,8 @@ class Car extends EventEmitter {
                                                 }
 
                                                 that.emit('messageReceived', that.addFieldsToMessage(message));
+                                            } else {
+                                                that.emit('messageReceived', message);
                                             }
                                         });
                                     }

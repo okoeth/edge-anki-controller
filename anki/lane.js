@@ -17,16 +17,16 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-class TrackConfiguration  {
-    static getCurrentVersion() {
-        return "1.0.1";
+class Lane {
+
+    constructor(sizeMM) {
+        this.sizeMM = sizeMM;
+        this.positions = {};
     }
 
-    constructor(tiles) {
-        this.version = TrackConfiguration.getCurrentVersion();
-        this.outdated = false;
-        this.tiles = tiles;
+    addPosition(position) {
+        this.positions[position] = position;
     }
 }
 
-module.exports = TrackConfiguration;
+module.exports = Lane;
