@@ -163,7 +163,7 @@ class Car extends EventEmitter {
                                                                 message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
                                                         }
 
-
+                                                        message.posLocation = parseInt(message.posLocation);
                                                         that.updateLocation(message);
                                                     }
                                                     else if (message instanceof VehicleDelocalizedMessage) {

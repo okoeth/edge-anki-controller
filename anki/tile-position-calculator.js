@@ -188,7 +188,7 @@ class TilePositionCalculator {
         var positions = tile["lane" + laneNo].positions;
 
         for(var key in positions)  {
-            return key;
+            return positions[key];
         }
     }
 
