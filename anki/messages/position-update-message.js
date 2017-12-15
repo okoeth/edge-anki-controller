@@ -33,6 +33,7 @@ class PositionUpdateMessage extends CarMessage {
         this.posTileType = null;
         //internal position has to be calculated
         this.posOptions = [];
+        this.maxTileNo = 0;
     }
 }
 

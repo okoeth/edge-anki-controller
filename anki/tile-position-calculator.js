@@ -185,7 +185,9 @@ class TilePositionCalculator {
     }
 
     getFirstTilePosition(tile, laneNo) {
+        console.log("DEBUG:" + tile["lane" + laneNo])
         var positions = tile["lane" + laneNo].positions;
+
 
         for(var key in positions)  {
             return positions[key];
@@ -196,6 +198,9 @@ class TilePositionCalculator {
         return this.trackConfiguration.tiles[tileIndex];
     }
 
+    getMaxTileNo() {
+        return Object.keys(this.trackConfiguration.tiles).length;
+    }
 }
 
 module.exports = TilePositionCalculator;

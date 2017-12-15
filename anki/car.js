@@ -130,6 +130,7 @@ class Car extends EventEmitter {
                                                             message.posOptions = [new PosOption(currentTile.id, 75)];
                                                             message.laneNo = that.laneNo;
                                                             message.carSpeed = that.carSpeed;
+                                                            message.maxTileNo = that.positionCalculator.getMaxTileNo();
 
                                                             if (that.laneNo !== undefined)
                                                                 message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
@@ -148,6 +149,7 @@ class Car extends EventEmitter {
                                                             that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
 
                                                         message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
+                                                        message.maxTileNo = that.positionCalculator.getMaxTileNo();
 
                                                         //If laneNo not found, take the old one
                                                         if (!message.laneNo && !that.laneNo) {

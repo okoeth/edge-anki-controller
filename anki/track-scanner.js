@@ -44,7 +44,8 @@ class TrackScanner {
             "40": new Tile(undefined, 40, "STRAIGHT"),
             "18": new Tile(undefined, 18, "CURVE"),
             "23": new Tile(undefined, 23, "CURVE"),
-            "39": new Tile(undefined, 39, "STRAIGHT")
+            "39": new Tile(undefined, 39, "STRAIGHT"),
+            "36": new Tile(undefined, 36, "STRAIGHT")
         }
 
         this.createCurveSizes(this.knownTiles["17"]);
@@ -53,6 +54,7 @@ class TrackScanner {
         this.createCurveSizes(this.knownTiles["23"]);
         this.createStraightSizes(this.knownTiles["40"]);
         this.createStraightSizes(this.knownTiles["39"]);
+        this.createStraightSizes(this.knownTiles["36"]);
     }
 
 
@@ -88,10 +90,13 @@ class TrackScanner {
                     if(this.tiles[this.tileIndex] === undefined) {
                         knownTile = this.knownTiles[message.posTileNo];
 
-                        if(!knownTile)
+                        if(!knownTile) {
+                            console.log("WARNING: Tile unknown, please add to known tiles to work properly");
                             this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
-                        else
+                        }
+                        else {
                             this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
+                        }
                     } else {
                         knownTile = this.knownTiles[message.posTileNo];
                     }
@@ -101,6 +106,8 @@ class TrackScanner {
                     //TODO: Refactor all usages of configuration / tiles / lanes
                     if(!knownTile) {
                         //Tile not known, we have no mm info
+                        this.tiles[this.tileIndex][laneKey] = new Lane("0");
+                        this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
                     } else {
                         //Set lane size and add position
                         var knownLane = knownTile[laneKey];
