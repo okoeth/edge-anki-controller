@@ -85,9 +85,15 @@ config.read(options['config'], function (carNo, carId, startlane) {
             noble.stopScanning();
         }, 2000);
 
+
+        var notDiscoveredTimeout = setTimeout(function() {
+        	console.log("WARNING: Could not discover car");
+        	process.exit();
+		}, 10000);
         noble.on('discover', function (peripheral) {
             console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
             if (peripheral.id === carId) {
+                clearTimeout(notDiscoveredTimeout);
                 noble.stopScanning();
 
                 var advertisement = peripheral.advertisement;
