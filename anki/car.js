@@ -121,21 +121,20 @@ class Car extends EventEmitter {
                                                     if (message instanceof TransitionUpdateMessage) {
                                                         if (that.currentTileIndex > -1) {
                                                             //Interpolate
-                                                            that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                             that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
                                                             var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
 
-                                                            message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
-                                                            message.posTileNo = currentTile.realId;
-                                                            message.posTileType = currentTile.type;
-                                                            message.posOptions = [new PosOption(currentTile.id, 75)];
-                                                            message.laneNo = that.laneNo;
-                                                            message.carSpeed = that.carSpeed;
-                                                            message.maxTileNo = that.positionCalculator.getMaxTileNo();
-
-                                                            if (that.laneNo !== undefined)
+                                                            if (that.laneNo !== undefined) {
+                                                                message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
+                                                                message.posTileNo = currentTile.realId;
+                                                                message.posTileType = currentTile.type;
+                                                                message.posOptions = [new PosOption(currentTile.id, 75)];
+                                                                message.laneNo = that.laneNo;
+                                                                message.carSpeed = that.carSpeed;
                                                                 message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
-
-                                                            that.updateLocation(message);
+                                                                message.maxTileNo = that.positionCalculator.getMaxTileNo();
+                                                                that.updateLocation(message);
+                                                            }
                                                         }
                                                     }
                                                     else if (message instanceof PositionUpdateMessage) {

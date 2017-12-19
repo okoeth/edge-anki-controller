@@ -185,7 +185,7 @@ class TilePositionCalculator {
     }
 
     getFirstTilePosition(tile, laneNo) {
-        console.log("DEBUG:" + tile["lane" + laneNo])
+        console.log("DEBUG: Lane positions" + tile["lane" + laneNo].positions)
         var positions = tile["lane" + laneNo].positions;
 
 

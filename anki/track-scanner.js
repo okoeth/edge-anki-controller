@@ -45,7 +45,8 @@ class TrackScanner {
             "18": new Tile(undefined, 18, "CURVE"),
             "23": new Tile(undefined, 23, "CURVE"),
             "39": new Tile(undefined, 39, "STRAIGHT"),
-            "36": new Tile(undefined, 36, "STRAIGHT")
+            "36": new Tile(undefined, 36, "STRAIGHT"),
+            "10": new Tile(undefined, 10, "CROSSING")
         }
 
         this.createCurveSizes(this.knownTiles["17"]);
@@ -55,6 +56,9 @@ class TrackScanner {
         this.createStraightSizes(this.knownTiles["40"]);
         this.createStraightSizes(this.knownTiles["39"]);
         this.createStraightSizes(this.knownTiles["36"]);
+
+        //Crossing has same size as STRAIGHT
+        this.createStraightSizes(this.knownTiles["10"])
     }
 
 
