@@ -130,24 +130,6 @@ class TilePositionCalculator {
                 currentLane = 4;
             }
 
-            //Then try to find by prefix
-            if(currentLane === undefined && !this.trackConfiguration.outdated) {
-                var lane1TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane1.positions));
-                var lane2TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane2.positions));
-                var lane3TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane3.positions));
-                var lane4TilePositionPrefix = this.getPositionPrefix(this.getMedianPositionItem(tile.lane4.positions));
-
-                if (lane1TilePositionPrefix === positionPrefix) {
-                    currentLane = 1;
-                } else if (lane2TilePositionPrefix === positionPrefix) {
-                    currentLane = 2;
-                } else if (lane3TilePositionPrefix === positionPrefix) {
-                    currentLane = 3;
-                } else if (lane4TilePositionPrefix === positionPrefix) {
-                    currentLane = 4;
-                }
-            }
-
             if(!proposedLane) {
                 proposedLane = currentLane;
             }

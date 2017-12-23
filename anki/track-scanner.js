@@ -30,6 +30,8 @@ class TrackScanner {
         this.car = car;
         this.filename = filename;
 
+        this.lowSpeed = 300
+        this.highSpeed = 400
         this.tiles = {};
         this.tileIndex = 0;
         this.transitionReceived = true;
@@ -143,9 +145,12 @@ class TrackScanner {
                         this.car.removeListener("messageReceived", this.messageReceived.bind(this));
                         this.configCompleted();
                     }
-
-                    else
+                    else {
                         that.car.sendCommand("c " + this.currentLane);
+                        this.car.sendCommand("s " + this.lowSpeed);
+                    }
+                } else {
+                    this.car.sendCommand("s" + this.highSpeed);
                 }
             }
 
@@ -155,7 +160,7 @@ class TrackScanner {
 
     scanTrack(countTiles) {
         //Let the car drive slowly (150)
-        this.car.sendCommand("s 300");
+        this.car.sendCommand("s " + this.lowSpeed);
 
         console.log('INFO: Starting scan');
 

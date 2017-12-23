@@ -27,6 +27,9 @@ const TransitionUpdateMessage = require('./messages/transition-update-message');
 const PositionCalculator = require("./tile-position-calculator");
 const PosOption = require("./pos-option");
 
+const CROSSING_TILE_ID = "10"
+const CROSSING_LANE_LENGTH = 560
+
 class Car extends EventEmitter {
     constructor(no, startLane, trackConfiguration) {
         super();
@@ -42,7 +45,8 @@ class Car extends EventEmitter {
     }
 
     updateLocation(positionUpdateMessage) {
-        this.laneNo = positionUpdateMessage.laneNo;
+        if(positionUpdateMessage.laneNo !== null)
+            this.laneNo = positionUpdateMessage.laneNo;
         this.realTileId = positionUpdateMessage.posTileNo;
         this.tileId = positionUpdateMessage.posOptions;
         this.position = positionUpdateMessage.posLocation;
@@ -84,7 +88,7 @@ class Car extends EventEmitter {
             }
             // Handle services (there is only one service)
             peripheral.discoverServices([], function (error, services) {
-                console.log('INFO: Discovered services');
+                console.log('INFO: Discovered services ' + services);
                 if (error != null) {
                     console.log('ERROR: Error connection car', error);
                     process.exit(1);
@@ -95,6 +99,8 @@ class Car extends EventEmitter {
                 // Handle characteristics (iterate of all characteristics provided)
                 service.discoverCharacteristics([], function (error, characteristics) {
                     var characteristicIndex = 0;
+
+                    console.log("Characteristics: " + characteristics);
 
                     async.whilst(
                         // Whilst condition
@@ -108,73 +114,110 @@ class Car extends EventEmitter {
                             async.series([
                                 // Step 1: Handle characteristic
                                 function (callback) {
+                                                                
                                     if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
                                         console.log('INFO: Read characteristic');
                                         that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
 
                                             var message = that.bluetoothMessageExtractor.generateMessage(data);
-                                            
-                                            if (message !== undefined) {
-                                                if(that.validConfiguration) {
-                                                    console.log("INFO: Received message: " + JSON.stringify(message));
+                                            try {
+                                                if (message !== undefined) {
+                                                    if (that.validConfiguration) {
+                                                        console.log("INFO: Received message: " + JSON.stringify(message));
 
-                                                    if (message instanceof TransitionUpdateMessage) {
-                                                        if (that.currentTileIndex > -1) {
-                                                            //Interpolate
-                                                             that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
-                                                            var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
+                                                        if (message instanceof TransitionUpdateMessage) {
+                                                            if (that.currentTileIndex > -1) {
+                                                                //Interpolate
+                                                                that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);
+                                                                var currentTile = that.positionCalculator.getTileByIndex(that.currentTileIndex);
 
-                                                            if (that.laneNo !== undefined) {
-                                                                message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
-                                                                message.posTileNo = currentTile.realId;
-                                                                message.posTileType = currentTile.type;
-                                                                message.posOptions = [new PosOption(currentTile.id, 75)];
-                                                                message.laneNo = that.laneNo;
-                                                                message.carSpeed = that.carSpeed;
-                                                                message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
-                                                                message.maxTileNo = that.positionCalculator.getMaxTileNo();
-                                                                that.updateLocation(message);
+                                                                if (that.laneNo !== undefined && message.posLocation != CROSSING_TILE_ID) {
+                                                                    message.posLocation = that.positionCalculator.getFirstTilePosition(currentTile, that.laneNo);
+                                                                    message.posTileNo = currentTile.realId;
+                                                                    message.posTileType = currentTile.type;
+                                                                    message.posOptions = [new PosOption(currentTile.id, 75)];
+                                                                    message.laneNo = that.laneNo;
+                                                                    message.carSpeed = that.carSpeed;
+                                                                    message.laneLength = that.positionCalculator.getLaneLength(currentTile, that.laneNo);
+                                                                    message.maxTileNo = that.positionCalculator.getMaxTileNo();
+                                                                    that.updateLocation(message);
+                                                                } else if (that.laneNo !== undefined) {
+                                                                    message.posTileNo = currentTile.realId;
+                                                                    message.posTileType = currentTile.type;
+                                                                    message.posOptions = [new PosOption(currentTile.id, 100)];
+                                                                    message.laneNo = that.laneNo;
+                                                                    message.carSpeed = that.carSpeed;
+                                                                    message.laneLength = CROSSING_LANE_LENGTH
+                                                                    message.maxTileNo = that.positionCalculator.getMaxTileNo();
+                                                                    that.updateLocation(message);
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                                    else if (message instanceof PositionUpdateMessage) {
+                                                        else if (message instanceof PositionUpdateMessage) {
 
-                                                        /***
-                                                         * TODO: If last update was a while ago (time difference),
-                                                         * don't use for calculation of internal piece id
-                                                         */
-                                                        console.log('INFO: TileID:', that.tileId);
-                                                        message.posOptions =
-                                                            that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
+                                                            /***
+                                                             * TODO: If last update was a while ago (time difference),
+                                                             * don't use for calculation of internal piece id
+                                                             */
+                                                            console.log('INFO: TileID:', that.tileId);
 
-                                                        message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
-                                                        message.maxTileNo = that.positionCalculator.getMaxTileNo();
 
-                                                        //If laneNo not found, take the old one
-                                                        if (!message.laneNo && !that.laneNo) {
-                                                            message.laneNo = that.laneNo;
+                                                            message.posOptions =
+                                                                that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
+
+                                                            if (message.posTileNo != CROSSING_TILE_ID) {
+
+                                                                message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
+                                                                message.maxTileNo = that.positionCalculator.getMaxTileNo();
+
+                                                                //If laneNo not found, take the old one
+                                                                if (!message.laneNo && that.laneNo !== undefined) {
+                                                                    message.laneNo = that.laneNo;
+                                                                }
+
+                                                                if (message.posOptions.length == 1) {
+                                                                    that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                                    that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
+
+                                                                    message.posTileType = that.currentTile.type;
+                                                                    if (message.laneNo !== undefined)
+                                                                        message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
+                                                                }
+
+                                                                message.posLocation = parseInt(message.posLocation);
+                                                                that.updateLocation(message);
+
+                                                            } else {
+                                                                message.maxTileNo = that.positionCalculator.getMaxTileNo();
+
+                                                                //If laneNo not found, take the old one
+                                                                if (!message.laneNo && that.laneNo !== undefined) {
+                                                                    message.laneNo = that.laneNo;
+                                                                }
+
+                                                                message.laneLength = CROSSING_LANE_LENGTH;
+                                                                that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                                that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
+                                                                message.posTileType = that.currentTile.type;
+
+                                                                if (message.posLocation !== undefined)
+                                                                    message.posLocation = parseInt(message.posLocation);
+                                                                that.updateLocation(message);
+                                                            }
+
+
+                                                        }
+                                                        else if (message instanceof VehicleDelocalizedMessage) {
+                                                            that.resetLocation();
                                                         }
 
-                                                        if (message.posOptions.length == 1) {
-                                                            that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
-                                                            that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
-
-                                                            message.posTileType = that.currentTile.type;
-                                                            if (message.laneNo !== undefined)
-                                                                message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
-                                                        }
-
-                                                        message.posLocation = parseInt(message.posLocation);
-                                                        that.updateLocation(message);
+                                                        that.emit('messageReceived', that.addFieldsToMessage(message));
+                                                    } else {
+                                                        that.emit('messageReceived', message);
                                                     }
-                                                    else if (message instanceof VehicleDelocalizedMessage) {
-                                                        that.resetLocation();
-                                                    }
-
-                                                    that.emit('messageReceived', that.addFieldsToMessage(message));
-                                                } else {
-                                                    that.emit('messageReceived', message);
                                                 }
+                                            } catch (e) {
+                                                console.error(e);
                                             }
                                         });
                                     }

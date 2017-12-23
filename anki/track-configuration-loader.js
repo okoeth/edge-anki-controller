@@ -56,8 +56,12 @@ class TrackConfigurationLoader {
                 //Load config from local disc
                 if(!fs.existsSync(this.configPath)) {
                     console.log("WARNING: Track configuration does not exist. Please scan with scan <count-tiles> command");
-                    if (callback !== undefined)
-                        callback(new TrackConfiguration([]));
+                    if (callback !== undefined) {
+                        var trackConfig = new TrackConfiguration([])
+                        trackConfig.outdated = true;
+
+                        callback(trackConfig);
+                    }
                 }
                 else {
                     this.trackConfiguration = JSON.parse(fs.readFileSync(this.configPath, 'utf8'));
