@@ -255,6 +255,9 @@ class Car extends EventEmitter {
         console.log("INFO: Initialise laneNo");
         // turn on sdk and set laneOffset
         this.carMessageGateway.sendInitCommand(this.startLane);
+
+        //Battery status every 3 minutes
+        this.interval = setInterval(this.sendBatteryStatusRequest().bind(this), 1800000)
     }
 
     sendCommand(cmd) {
@@ -267,8 +270,8 @@ class Car extends EventEmitter {
         return message;
     }
 
-    addPositionToMessage(message) {
-
+    sendBatteryStatusRequest() {
+        sendCommand("bat");
     }
 
     disconnect() {
