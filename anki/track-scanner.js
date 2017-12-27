@@ -31,7 +31,7 @@ class TrackScanner {
         this.filename = filename;
 
         this.lowSpeed = 300
-        this.highSpeed = 400
+        this.highSpeed = 450
         this.tiles = {};
         this.tileIndex = 0;
         this.transitionReceived = true;
@@ -110,7 +110,6 @@ class TrackScanner {
 
                         var laneKey = "lane" + this.currentLane;
 
-                        //TODO: Refactor all usages of configuration / tiles / lanes
                         if (!knownTile) {
                             //Tile not known, we have no mm info
                             this.tiles[this.tileIndex][laneKey] = new Lane("0");
@@ -118,7 +117,8 @@ class TrackScanner {
                         } else {
                             //Set lane size and add position
                             var knownLane = knownTile[laneKey];
-                            this.tiles[this.tileIndex][laneKey] = knownLane;
+                            if(this.tiles[this.tileIndex][laneKey] === undefined)
+                                this.tiles[this.tileIndex][laneKey] = new Lane(knownLane.sizeMM);
                             this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
                         }
 

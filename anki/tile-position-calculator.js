@@ -167,6 +167,11 @@ class TilePositionCalculator {
     }
 
     getFirstTilePosition(tile, laneNo) {
+        if(["lane" + laneNo] === undefined) {
+            console.log("WARNING: No lane positions for lane "+ laneNo);
+            return undefined;
+        }
+
         console.log("DEBUG: Lane positions" + tile["lane" + laneNo].positions)
         var positions = tile["lane" + laneNo].positions;
 
