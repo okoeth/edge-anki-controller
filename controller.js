@@ -146,8 +146,6 @@ cli.on('line', function (cmd) {
             var trackScanner = new TrackScanner(car, options['trackConfig']);
             trackScanner.scanTrack(countTiles);
         }
-
-        configurationLoader.configurationChanged();
 	}
 	else {
 		console.log("INFO: Send command from CLI");

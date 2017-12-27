@@ -81,80 +81,84 @@ class TrackScanner {
     }
 
     messageReceived(message) {
-        var that = this;
-        if(message !== undefined) {
-            if (message instanceof TransitionUpdateMessage) {
-                console.log("INFO: Scanning transition update message");
-                this.transitionReceived = true;
-                this.tileIndex++;
-            }
-            else if (message instanceof PositionUpdateMessage) {
-                console.log("INFO: Scanning position update message");
+        try {
+            var that = this;
+            if (message !== undefined) {
+                if (message instanceof TransitionUpdateMessage) {
+                    console.log("INFO: Scanning transition update message");
+                    this.transitionReceived = true;
+                    this.tileIndex++;
+                }
+                else if (message instanceof PositionUpdateMessage) {
+                    console.log("INFO: Scanning position update message");
 
-                if (this.transitionReceived) {
-                    var knownTile = undefined;
-                    if(this.tiles[this.tileIndex] === undefined) {
-                        knownTile = this.knownTiles[message.posTileNo];
+                    if (this.transitionReceived) {
+                        var knownTile = undefined;
+                        if (this.tiles[this.tileIndex] === undefined) {
+                            knownTile = this.knownTiles[message.posTileNo];
 
-                        if(!knownTile) {
-                            console.log("WARNING: Tile unknown, please add to known tiles to work properly");
-                            this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
+                            if (!knownTile) {
+                                console.log("WARNING: Tile unknown, please add to known tiles to work properly");
+                                this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, "UNKNOWN");
+                            }
+                            else {
+                                this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
+                            }
+                        } else {
+                            knownTile = this.knownTiles[message.posTileNo];
+                        }
+
+                        var laneKey = "lane" + this.currentLane;
+
+                        //TODO: Refactor all usages of configuration / tiles / lanes
+                        if (!knownTile) {
+                            //Tile not known, we have no mm info
+                            this.tiles[this.tileIndex][laneKey] = new Lane("0");
+                            this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
+                        } else {
+                            //Set lane size and add position
+                            var knownLane = knownTile[laneKey];
+                            this.tiles[this.tileIndex][laneKey] = knownLane;
+                            this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
+                        }
+
+                        this.transitionReceived = false;
+                    }
+                    //already seen the tile
+                    else {
+                        var laneKey = "lane" + this.currentLane;
+                        this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation)
+                    }
+                }
+
+                if (this.tileIndex >= this.countTiles) {
+                    this.tileIndex = 0;
+                    this.currentCycle++;
+
+                    if (this.currentCycle >= 2) {
+                        this.currentLane++;
+                        //Switch lanes
+                        this.currentCycle = 0;
+
+                        if (this.currentLane > 4) {
+                            this.car.sendCommand("s 0");
+                            console.log("INFO: Scanning completed");
+                            this.car.removeListener("messageReceived", this.messageReceived.bind(this));
+                            this.configCompleted();
                         }
                         else {
-                            this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
+                            that.car.sendCommand("c " + this.currentLane);
+                            this.car.sendCommand("s " + this.lowSpeed);
                         }
                     } else {
-                        knownTile = this.knownTiles[message.posTileNo];
+                        this.car.sendCommand("s" + this.highSpeed);
                     }
-
-                    var laneKey = "lane" + this.currentLane;
-
-                    //TODO: Refactor all usages of configuration / tiles / lanes
-                    if(!knownTile) {
-                        //Tile not known, we have no mm info
-                        this.tiles[this.tileIndex][laneKey] = new Lane("0");
-                        this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
-                    } else {
-                        //Set lane size and add position
-                        var knownLane = knownTile[laneKey];
-                        this.tiles[this.tileIndex][laneKey] = knownLane;
-                        this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
-                    }
-
-                    this.transitionReceived = false;
                 }
-                //already seen the tile
-                else {
-                    var laneKey = "lane" + this.currentLane;
-                    this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation)
-                }
+
+                console.log("INFO: Current scanned config: " + JSON.stringify(this.tiles));
             }
-
-            if (this.tileIndex >= this.countTiles) {
-                this.tileIndex = 0;
-                this.currentCycle++;
-
-                if (this.currentCycle >= 2) {
-                    this.currentLane++;
-                    //Switch lanes
-                    this.currentCycle = 0;
-
-                    if (this.currentLane > 4) {
-                        this.car.sendCommand("s 0");
-                        console.log("INFO: Scanning completed");
-                        this.car.removeListener("messageReceived", this.messageReceived.bind(this));
-                        this.configCompleted();
-                    }
-                    else {
-                        that.car.sendCommand("c " + this.currentLane);
-                        this.car.sendCommand("s " + this.lowSpeed);
-                    }
-                } else {
-                    this.car.sendCommand("s" + this.highSpeed);
-                }
-            }
-
-            console.log("INFO: Current scanned config: " + JSON.stringify(this.tiles));
+        } catch(exception) {
+            console.error("Exception: " + exception)
         }
     }
 

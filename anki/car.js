@@ -257,11 +257,15 @@ class Car extends EventEmitter {
         this.carMessageGateway.sendInitCommand(this.startLane);
 
         //Battery status every 3 minutes
-        this.interval = setInterval(this.sendBatteryStatusRequest().bind(this), 1800000)
+        //this.interval = setInterval(this.sendBatteryStatusRequest().bind(this), 1800000)
     }
 
     sendCommand(cmd) {
-        this.carMessageGateway.sendCommand(cmd);
+        try {
+            this.carMessageGateway.sendCommand(cmd);
+        } catch(exception) {
+            console.error(exception)
+        }
     }
 
     addFieldsToMessage(message) {
