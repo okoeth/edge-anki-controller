@@ -24,6 +24,7 @@ const BluetoothMessageExtractor = require('./bluetooth-message-extractor');
 const PositionUpdateMessage = require('./messages/position-update-message');
 const VehicleDelocalizedMessage = require('./messages/vehicle-delocalized-message');
 const TransitionUpdateMessage = require('./messages/transition-update-message');
+const OffsetChangedMessage = require('./messages/offset-changed-message');
 const PositionCalculator = require("./tile-position-calculator");
 const PosOption = require("./pos-option");
 
@@ -42,6 +43,7 @@ class Car extends EventEmitter {
         this.currentTileIndex = -1;
 
         this.validConfiguration = !trackConfiguration.outdated;
+        this.isCurrentlyChangingLane = false;
     }
 
     updateLocation(positionUpdateMessage) {
@@ -177,8 +179,15 @@ class Car extends EventEmitter {
                                                                 that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
 
                                                                 message.posTileType = that.currentTile.type;
-                                                                if (message.laneNo !== undefined)
+                                                                if (message.laneNo !== undefined) {
                                                                     message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
+
+                                                                    //Correct the lane every fifth tile
+                                                                    if(that.currentTileIndex % 5 === 0 && !that.isCurrentlyChangingLane) {
+                                                                        console.log("DEBUG: Correcting lane to " + message.laneNo);
+                                                                        that.sendCommand("c " + message.laneNo);
+                                                                    }
+                                                                }
                                                             }
 
                                                             message.posLocation = parseInt(message.posLocation);
@@ -206,6 +215,10 @@ class Car extends EventEmitter {
                                                     }
                                                     else if (message instanceof VehicleDelocalizedMessage) {
                                                         that.resetLocation();
+                                                    }
+                                                    else if (message instanceof OffsetChangedMessage) {
+                                                        console.log("DEBUG: Currently changing lane set to false");
+                                                        that.isCurrentlyChangingLane = false;
                                                     }
 
                                                     that.emit('messageReceived', that.addFieldsToMessage(message));
@@ -258,6 +271,11 @@ class Car extends EventEmitter {
 
     sendCommand(cmd) {
         try {
+            if(cmd.indexOf('c') > -1) {
+                console.log("DEBUG: Currently changing lane set to true");
+                this.isCurrentlyChangingLane = true;
+            }
+
             this.carMessageGateway.sendCommand(cmd);
         } catch(exception) {
             console.error(exception)
