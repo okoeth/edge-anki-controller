@@ -8,7 +8,7 @@
     "command-line-args": "^4.0.7",
     "fs": "0.0.1-security",
     "kafka-node": "2.3.0",
-    "noble": "~1.2.1",
+    "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra",
     "properties": "1.2.1"
   },
   "keywords": [
