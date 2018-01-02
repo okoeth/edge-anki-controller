@@ -29,6 +29,7 @@ var kafka = undefined;
 var Car = require('./anki/car');
 var TrackScanner = require('./anki/track-scanner');
 var TrackConfigurationLoader = require('./anki/track-configuration-loader');
+var configurationLoader;
 
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
@@ -69,7 +70,7 @@ config.read(options['config'], function (carNo, carId, startlane) {
 		}
 	});
 
-    new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function(trackConfiguration) {
+    configurationLoader = new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function(trackConfiguration) {
         //setup noble
         if (options['noble']) {
             noble = noble_factory.create(options['noble'], carId, trackConfiguration);
