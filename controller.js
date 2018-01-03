@@ -79,36 +79,41 @@ config.read(options['config'], function (carNo, carId, startlane) {
         }
         lane = startlane;
 
+        noble.on('stateChange', function(state) {
+            if (state === 'poweredOn') {
+                var notDiscoveredTimeout = setTimeout(function() {
+                    console.log("WARNING: Could not discover car");
+                    process.exit();
+                }, 10000);
 
-        console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
-        noble.startScanning();
-        setTimeout(function () {
-            noble.stopScanning();
-        }, 2000);
+                console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
+                noble.startScanning();
+                setTimeout(function () {
+                    noble.stopScanning();
+                }, 2000);
 
+                noble.on('discover', function (peripheral) {
+                    console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
+                    if (peripheral.id === carId) {
+                        clearTimeout(notDiscoveredTimeout);
+                        noble.stopScanning();
 
-        var notDiscoveredTimeout = setTimeout(function() {
-        	console.log("WARNING: Could not discover car");
-        	process.exit();
-		}, 10000);
-        noble.on('discover', function (peripheral) {
-            console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
-            if (peripheral.id === carId) {
-                clearTimeout(notDiscoveredTimeout);
+                        var advertisement = peripheral.advertisement;
+                        var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
+                        if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
+                            console.log('INFO: Car discovered. ID: ' + peripheral.id);
+                            car = new Car(carNo, startlane, trackConfiguration);
+                            car.setPeripheral(peripheral);
+
+                            // When car gets new message
+                            car.on('messageReceived', function(message) {
+                                kafka.sendMessage(JSON.stringify(message));
+                            });
+                        }
+                    }
+                });
+            } else {
                 noble.stopScanning();
-
-                var advertisement = peripheral.advertisement;
-                var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
-                if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
-                    console.log('INFO: Car discovered. ID: ' + peripheral.id);
-                    car = new Car(carNo, startlane, trackConfiguration);
-                    car.setPeripheral(peripheral);
-
-                    // When car gets new message
-                    car.on('messageReceived', function(message) {
-                        kafka.sendMessage(JSON.stringify(message));
-                    });
-                }
             }
         });
     });
