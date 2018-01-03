@@ -18,9 +18,9 @@
 # DEALINGS IN THE SOFTWARE.
 
 # Note: This file requires access to the bluetooth stack of the host. For me this worked with
-#       sudo docker run -t -i --rm --privileged --net=host okoeth/edge-anki-controller \
+#       sudo docker run -t -i --rm --net=host okoeth/edge-anki-controller
 #            
-
+#       Useful link: https://stackoverflow.com/questions/28868393/accessing-bluetooth-dongle-from-inside-docker#36865509
 
 FROM ubuntu:16.04
 
