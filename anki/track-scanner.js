@@ -103,6 +103,10 @@ class TrackScanner {
                             }
                             else {
                                 this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
+                                this.tiles[this.tileIndex]["lane1"] = new Lane(knownTile.lane1.sizeMM);
+                                this.tiles[this.tileIndex]["lane2"] = new Lane(knownTile.lane2.sizeMM);
+                                this.tiles[this.tileIndex]["lane3"] = new Lane(knownTile.lane3.sizeMM);
+                                this.tiles[this.tileIndex]["lane4"] = new Lane(knownTile.lane4.sizeMM);
                             }
                         } else {
                             knownTile = this.knownTiles[message.posTileNo];
@@ -117,8 +121,9 @@ class TrackScanner {
                         } else {
                             //Set lane size and add position
                             var knownLane = knownTile[laneKey];
-                            if(this.tiles[this.tileIndex][laneKey] === undefined)
+                            if(this.tiles[this.tileIndex][laneKey] === undefined) {
                                 this.tiles[this.tileIndex][laneKey] = new Lane(knownLane.sizeMM);
+                            }
                             this.tiles[this.tileIndex][laneKey].addPosition(message.posLocation);
                         }
 
