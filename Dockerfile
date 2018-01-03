@@ -18,9 +18,8 @@
 # DEALINGS IN THE SOFTWARE.
 
 # Note: This file requires access to the bluetooth stack of the host. For me this worked with
-#       sudo docker run -t -i --rm --privileged --net=host edge-anki-controller \
-#            -c config/config-car1-home-ok-linux.properties \
-#            -t config/track-config-home-ok-linux.json -k mock
+#       sudo docker run -t -i --rm --privileged --net=host okoeth/edge-anki-controller \
+#            
 
 
 FROM ubuntu:16.04
@@ -51,4 +50,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD [ "node", "controller.js", "" ]
+ENTRYPOINT node controller.js
