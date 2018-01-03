@@ -153,13 +153,7 @@ class Car extends EventEmitter {
                                                         }
                                                     }
                                                     else if (message instanceof PositionUpdateMessage) {
-
-                                                        /***
-                                                         * TODO: If last update was a while ago (time difference),
-                                                         * don't use for calculation of internal piece id
-                                                         */
                                                         console.log('INFO: TileID:', that.tileId);
-
 
                                                         message.posOptions =
                                                             that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
