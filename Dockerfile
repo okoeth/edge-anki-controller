@@ -50,4 +50,6 @@ COPY . .
 
 EXPOSE 8080
 
-ENTRYPOINT node controller.js
+ENTRYPOINT ["node", "controller.js"]
+
+CMD ["-c", "config/config-car1-home-ok-linux.properties", "-t", "config/track-config-home-ok.json", "-k", "mock"]
