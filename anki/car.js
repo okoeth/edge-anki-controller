@@ -25,6 +25,7 @@ const PositionUpdateMessage = require('./messages/position-update-message');
 const VehicleDelocalizedMessage = require('./messages/vehicle-delocalized-message');
 const TransitionUpdateMessage = require('./messages/transition-update-message');
 const OffsetChangedMessage = require('./messages/offset-changed-message');
+const CarInitialisedMessage = require('./messages/car-initialised-message');
 const PositionCalculator = require("./tile-position-calculator");
 const PosOption = require("./pos-option");
 
@@ -176,8 +177,8 @@ class Car extends EventEmitter {
                                                                 if (message.laneNo !== undefined) {
                                                                     message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
 
-                                                                    //Correct the lane every fifth tile
-                                                                    if(that.currentTileIndex % 5 === 0 && !that.isCurrentlyChangingLane) {
+                                                                    //Correct the lane every n-1 th tile
+                                                                    if(that.currentTileIndex % (message.maxTileNo-1) === 0 && !that.isCurrentlyChangingLane) {
                                                                         console.log("DEBUG: Correcting lane to " + message.laneNo);
                                                                         that.sendCommand("c " + message.laneNo);
                                                                     }
@@ -213,6 +214,13 @@ class Car extends EventEmitter {
                                                     else if (message instanceof OffsetChangedMessage) {
                                                         console.log("DEBUG: Currently changing lane set to false");
                                                         that.isCurrentlyChangingLane = false;
+                                                    }
+                                                    else if(message instanceof CarInitialisedMessage) {
+                                                        console.log("INFO: Car initialised");
+                                                        that.sendBatteryStatusRequest();
+
+                                                        //Ask battery status every 3 minutes
+                                                        setInterval(that.sendBatteryStatusRequest.bind(that), 180000)
                                                     }
 
                                                     that.emit('messageReceived', that.addFieldsToMessage(message));
@@ -258,9 +266,6 @@ class Car extends EventEmitter {
         console.log("INFO: Initialise laneNo");
         // turn on sdk and set laneOffset
         this.carMessageGateway.sendInitCommand(this.startLane);
-
-        //Battery status every 3 minutes
-        //this.interval = setInterval(this.sendBatteryStatusRequest().bind(this), 1800000)
     }
 
     sendCommand(cmd) {
@@ -283,7 +288,7 @@ class Car extends EventEmitter {
     }
 
     sendBatteryStatusRequest() {
-        sendCommand("bat");
+        this.sendCommand("bat");
     }
 
     disconnect() {

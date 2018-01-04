@@ -26,6 +26,7 @@ var TransitionUpdateMessage = require('./messages/transition-update-message');
 var DelocalizedMessage = require('./messages/vehicle-delocalized-message');
 var OffsetCenterMessage = require('./messages/offset-center-message');
 var OffsetChangedMessage = require('./messages/offset-changed-message');
+var CarInitialisedMessage = require('./messages/car-initialised-message');
 
 class BluetoothMessageExtractor {
 
@@ -118,6 +119,7 @@ class BluetoothMessageExtractor {
         else if (msgID == '134') {
             // example: <Buffer 0b 86 8e 00 27 08 00 00 10 10 00 00>
             //console.log('Message: ' + msgID, data, 'Not documented');
+            return new CarInitialisedMessage(msgID, MessageNames.CAR_INITIALISED, msgTimestamp);
         }
 
         else if (msgID == '201') {

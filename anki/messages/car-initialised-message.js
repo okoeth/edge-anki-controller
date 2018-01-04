@@ -17,16 +17,13 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-const MessageNames = {
-    POSITION_UPDATE: "POSITION_UPDATE",
-    PING: "PING",
-    VERSION: "VERSION",
-    BATTERY_LEVEL: "BATTERY_LEVEL",
-    TRANSITION_UPDATE: "TRANSITION_UPDATE",
-    VEHICLE_DELOCALIZED: "VEHICLE_DELOCALIZED",
-    OFFSET_CENTER: "OFFSET_CENTER",
-    OFFSET_CHANGED: "OFFSET_CHANGED",
-    CAR_INITIALISED: "CAR_INITIALISED"
+var CarMessage = require('./car-message');
+
+class CarInitialisedMessage extends CarMessage {
+
+    constructor(msgID, msgName, msgTimestamp) {
+        super(msgID, msgName, msgTimestamp);
+    }
 }
 
-module.exports = MessageNames;
+module.exports = CarInitialisedMessage;
