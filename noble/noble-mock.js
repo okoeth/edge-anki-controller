@@ -23,8 +23,13 @@ const PeripheralMock = require('./periperhal-mock');
 class NobleMock extends EventEmitter {
     constructor(carId, readCharacteristicsMock) {
         super();
-
+        var that = this;
         this.periphal = new PeripheralMock(carId, readCharacteristicsMock);
+
+        //Send powered on state change message
+        setTimeout(function() {
+            that.emit('stateChange', 'poweredOn');
+        }, 1000);
     }
 
     startScanning() {

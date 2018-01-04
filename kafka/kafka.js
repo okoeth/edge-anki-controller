@@ -17,7 +17,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-var kafka = require('kafka-node');
 const EventEmitter = require('events');
 
 var kafkaEdgeServer = process.env.KAFKA_EDGE_SERVER;
@@ -27,6 +26,8 @@ class Kafka extends EventEmitter {
 
     constructor(carNo) {
         super();
+        var Kafka = require('node-rdkafka');
+
         var that = this;
         if (kafkaEdgeServer==null || kafkaEdgeServer==''){
             console.log('Using 127.0.0.1 as default Kafka edge server.');
@@ -40,51 +41,69 @@ class Kafka extends EventEmitter {
 
         ////////////////////////////////////////////////////////////////////////////////
         // Set-up Kafak client, producer, and consumer
-        this.kafkaClient = new kafka.KafkaClient({kafkaHost: kafkaEdgeServer+':9092'});
-        this.kafkaProducer = new kafka.Producer(this.kafkaClient);
+        that.kafkaProducer = new Kafka.Producer({
+            'metadata.broker.list': kafkaEdgeServer+':9092'
+            //'queue.buffering.max.messages': 1
+        });
 
-        this.kafkaProducer.on('ready', function () {
+        that.kafkaProducer.connect();
+        that.kafkaProducer.on('ready', function () {
             console.log('Kafka producer is ready.');
         });
 
-        this.kafkaProducer.on('error', function (err) {
-            console.log('Error in Kafka producer: '+err);
+        // Any errors we encounter, including connection errors
+        that.kafkaProducer.on('event.error', function(err) {
+            console.error('Error in kafka producer');
+            console.error(err);
         });
 
-        console.log('INFO: Connection Kafka Consumer on Topic Command'+carNo);
-        this.kafkaConsumer = new kafka.Consumer(
-            that.kafkaClient,
-            [
-                { topic: 'Command'+carNo, partition: 0 }
-            ],
-            {
-                autoCommit: true
-            }
-        );
+        var consumer = new Kafka.KafkaConsumer({
+            'group.id': 'kafka',
+            'metadata.broker.list': kafkaEdgeServer+':9092',
+        }, {});
 
-        this.kafkaConsumer.on('message', function (message) {
-            console.log('INFO: Received: ', message);
-            that.emit('message', message);
-        });
+        // Flowing mode
+        consumer.connect();
 
-        this.kafkaConsumer.on('error', function (err) {
-            console.log('ERROR: Error in Kafka consumer: '+err);
-        });
+        consumer
+            .on('ready', function() {
+                consumer.subscribe(['Command' + carNo]);
 
-        this.kafkaConsumer.on('offsetOutOfRange', function (err) {
-            console.log('ERROR: Error offsetOutOfRange in Kafka consumer: '+err);
-        });
+                // Consume from the Command<car-no> topic. This is what determines
+                // the mode we are running in. By not specifying a callback (or specifying
+                // only a callback) we get messages as soon as they are available.
+                consumer.consume();
+            })
+            .on('data', function(data) {
+                // Output the actual message contents
+                console.log('INFO: Received: ', data.value.toString());
+                that.emit('message', data.value.toString());
+            })
+            .on('disconnected', function() {
+                console.log("INFO: Kafka consumer disconnected");
+            })
+            .on('event.error', function(err) {
+                console.log("INFO: Kafka consumer error " + err);
+
+            });
     }
 
     sendMessage(message) {
         console.log("INFO: Kafka SendMessage invoked: ", message);
-        this.kafkaProducer.send([{topic: 'Status', messages: message, partition: 0}],
-            function (err, data) {
-                if (err!=null) {
-                    console.log("ERROR: Error sending message: ", err);
-                }
-            }
-        );
+        try {
+            this.kafkaProducer.produce(
+                // Topic to send the message to
+                'Status',
+                // optionally we can manually specify a partition for the message
+                // this defaults to -1 - which will use librdkafka's default partitioner (consistent random for keyed messages, random for unkeyed messages)
+                0,
+                // Message to send. Must be a buffer
+                new Buffer(message)
+            );
+        } catch (err) {
+            console.error('A problem occurred when sending our message');
+            console.error(err);
+        }
     }
 
 }

@@ -17,6 +17,8 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+
+
 module.exports.create = function(type, carNo, carMessageGateway) {
     if(type === "mock") {
         console.log("INFO: Using kafka mocked" );
@@ -24,7 +26,7 @@ module.exports.create = function(type, carNo, carMessageGateway) {
         return new KafkaMock(carNo);
     }
     else {
-        console.log("INFO: Using kafka");
+
         var Kafka = require("./kafka");
         return new Kafka(carNo);
     }

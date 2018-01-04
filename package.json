@@ -9,6 +9,7 @@
     "fs": "0.0.1-security",
     "kafka-node": "2.3.0",
     "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra",
+    "node-rdkafka": "^2.2.1",
     "properties": "1.2.1"
   },
   "keywords": [
