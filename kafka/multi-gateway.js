@@ -17,26 +17,34 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+const EventEmitter = require('events');
+class MultiGateway extends EventEmitter {
 
+    constructor(kafkaGateway, httpGateway) {
+        super();
+        var that = this;
+        that.kafkaGateway = kafkaGateway;
+        that.httpGateway = httpGateway;
 
-module.exports.create = function(type, carNo, carMessageGateway) {
-    if(type === "mock") {
-        console.log("INFO: Using kafka mocked" );
-        var KafkaMock = require("./kafka-mock");
-        return new KafkaMock(carNo);
+        kafkaGateway.on('message', function(message) {
+            that.emit('message', message);
+
+        });
+
+        httpGateway.on('message', function(message) {
+            that.emit('message', message);
+        });
     }
-    else if(type === "kafka") {
-        var Kafka = require("./kafka");
-        return new Kafka(carNo);
+
+    sendMessage(message) {
+        this.kafkaGateway.sendMessage(message);
+        this.httpGateway.sendMessage(message);
     }
-    else if(type === "http") {
-        var HttpGateway = require("./http-gateway");
-        return new HttpGateway(carNo);
+
+    disconnect() {
+        this.kafkaGateway.disconnect();
     }
-    else {
-        var MultiGateway = require("./multi-gateway");
-        var Kafka = require("./kafka");
-        var HttpGateway = require("./http-gateway");
-        return new MultiGateway(new Kafka(carNo), new HttpGateway(carNo));
-    }
-};
+
+}
+
+module.exports = MultiGateway;

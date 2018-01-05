@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "~0.2.9",
     "command-line-args": "^4.0.7",
+    "express": "^4.16.2",
     "fs": "0.0.1-security",
     "kafka-node": "2.3.0",
     "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra",

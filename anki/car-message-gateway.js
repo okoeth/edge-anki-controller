@@ -21,6 +21,8 @@ var prepareMessages = require('../prepareMessages.js')();
 
 class CarMessageGateway {
 
+    //TODO: Use both http and kafka gateway (for both reading and writing)
+
     constructor() {
     }
 

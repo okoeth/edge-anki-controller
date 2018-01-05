@@ -59,7 +59,7 @@ config.read(options['config'], function (carNo, carId, startlane) {
 	if (options['kafka'] !== undefined) {
 		kafka = kafka_factory.create(options['kafka'], carNo, carMessageGateway);
 	} else {
-		kafka = kafka_factory.create("kafka", carNo, carMessageGateway);
+		kafka = kafka_factory.create("multi", carNo, carMessageGateway);
 	}
 
 	kafka.on('message', function(message) {
