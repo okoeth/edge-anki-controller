@@ -63,8 +63,8 @@ config.read(options['config'], function (carNo, carId, startlane) {
 	}
 
 	kafka.on('message', function(message) {
-		if (car !== undefined && message.value != undefined) {
-		   car.sendCommand(message.value);
+		if (car !== undefined && message !== undefined) {
+		   car.sendCommand(message);
 		} else {
 			console.log('WARNING: Ignoring command... car not ready: ', message);
 		}
@@ -169,4 +169,8 @@ process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 function exitHandler(options, err) {
 	if (car)
 		car.disconnect();
+
+	if (kafka) {
+	    kafka.disconnect();
+    }
 }

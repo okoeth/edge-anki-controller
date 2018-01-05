@@ -57,26 +57,28 @@ class Kafka extends EventEmitter {
             console.error(err);
         });
 
-        var consumer = new Kafka.KafkaConsumer({
+        that.kafkaConsumer = new Kafka.KafkaConsumer({
             'group.id': 'kafka',
             'metadata.broker.list': kafkaEdgeServer+':9092',
+            'enable.auto.offset.store': false
         }, {});
 
         // Flowing mode
-        consumer.connect();
+        that.kafkaConsumer.connect();
 
-        consumer
+        that.kafkaConsumer
             .on('ready', function() {
-                consumer.subscribe(['Command' + carNo]);
+                that.kafkaConsumer.subscribe(['Command' + carNo]);
 
-                // Consume from the Command<car-no> topic. This is what determines
+                // Consume from the Command topic. This is what determines
                 // the mode we are running in. By not specifying a callback (or specifying
                 // only a callback) we get messages as soon as they are available.
-                consumer.consume();
+                that.kafkaConsumer.consume();
             })
             .on('data', function(data) {
                 // Output the actual message contents
-                console.log('INFO: Received: ', data.value.toString());
+                var latency = new Date().getTime()-data.timestamp;
+                console.log('INFO: Received kafka message at ' + new Date(), +  ' with latency: ' + latency + "ms, " + data.value.toString());
                 that.emit('message', data.value.toString());
             })
             .on('disconnected', function() {
@@ -104,6 +106,10 @@ class Kafka extends EventEmitter {
             console.error('A problem occurred when sending our message');
             console.error(err);
         }
+    }
+
+    disconnect() {
+        this.kafkaConsumer.disconnect();
     }
 
 }
