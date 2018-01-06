@@ -31,6 +31,9 @@ var TrackScanner = require('./anki/track-scanner');
 var TrackConfigurationLoader = require('./anki/track-configuration-loader');
 var configurationLoader;
 
+// add timestamps in front of log messages
+require('console-stamp')(console, '[HH:MM:ss.l]');
+
 const commandLineArgs = require('command-line-args')
 const optionDefinitions = [
     { name: 'config', alias: 'c', type: String, defaultValue: "config-car1.properties" },

@@ -34,7 +34,7 @@ class HttpGateway extends EventEmitter {
 
         var port = "809" + carNo;
         app.post('/cmd', function (req, res) {
-            console.log("INFO: Received post request: " + req.body);
+            console.log("INFO: Received post request at " + new Date() + ":" + req.body);
             that.emit('message', req.body);
             res.send('Received command');
         });
