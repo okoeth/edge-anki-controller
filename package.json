@@ -12,7 +12,9 @@
     "kafka-node": "2.3.0",
     "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra",
     "node-rdkafka": "^2.2.1",
-    "properties": "1.2.1"
+    "properties": "1.2.1",
+    "socket.io": "^2.0.4",
+    "ws": "^4.0.0"
   },
   "keywords": [
     "node",

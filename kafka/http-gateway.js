@@ -22,6 +22,9 @@ var http = require('http');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+const io = require('socket.io-client');
+const WebSocket = require('ws');
+
 
 class HttpGateway extends EventEmitter {
 
@@ -29,8 +32,17 @@ class HttpGateway extends EventEmitter {
         super();
         var that = this;
 
+        var url = 'http://localhost/status';
+        that.socket = new WebSocket('ws://localhost:8003/status');
+
+        that.socket.on('open', function open() {
+            console.log("INFO: Connected to websocket on " + url);
+        });
+
+
         //setup a http listener on port 900<car-no> for cmds
         app.use(bodyParser.text())
+
 
         var port = "809" + carNo;
         app.post('/cmd', function (req, res) {
@@ -47,17 +59,7 @@ class HttpGateway extends EventEmitter {
     sendMessage(message) {
         console.log("INFO: Http SendMessage invoked: ", message);
         try {
-            /*this.kafkaProducer.produce(
-                // Topic to send the message to
-                'Status',
-                // optionally we can manually specify a partition for the message
-                // this defaults to -1 - which will use librdkafka's default partitioner (consistent random for keyed messages, random for unkeyed messages)
-                0,
-                // Message to send. Must be a buffer
-                new Buffer(message)
-            );
-           */
-            var request = new http.ClientRequest({
+            /*var request = new http.ClientRequest({
                 hostname: "localhost",
                 port: 8089,
                 path: "/status",
@@ -72,7 +74,12 @@ class HttpGateway extends EventEmitter {
                 console.log('ERROR: Could not send message to adas ' + e.message);
             });
 
-            request.end(message);
+            request.end(message);*/
+
+            if(this.socket.readyState == 1)
+                this.socket.send(message);
+            else
+                console.error('ERROR: A problem occurred when sending our message to adas');
         } catch (err) {
             console.error('ERROR: A problem occurred when sending our message to adas');
             console.error(err);
