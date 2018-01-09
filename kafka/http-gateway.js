@@ -35,8 +35,8 @@ class HttpGateway extends EventEmitter {
         var that = this;
 
         if (httpWebsocket==null || httpWebsocket==''){
-            console.log('Using 127.0.0.1 as default http websocket server.');
-            httpWebsocket='127.0.0.1'
+            console.log('Using localhost as default http websocket server.');
+            httpWebsocket='localhost'
         }
 
         this.connectToSocket();
