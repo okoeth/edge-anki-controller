@@ -63,7 +63,7 @@ class HttpGateway extends EventEmitter {
             var that = this;
             console.log("INFO: Trying to connect to websocket");
 
-            that.socket = new WebSocket('ws://' + httpWebsocket + ' :8003/status');
+            that.socket = new WebSocket('ws://' + httpWebsocket + ':8003/status');
 
             that.socket.on('open', function open() {
                 console.log("INFO: Connected to websocket");
@@ -141,6 +141,10 @@ class HttpGateway extends EventEmitter {
     }
 
     disconnect() {
+        if(this.socket !== null)
+            this.socket.close();
+        this.socket = null
+
     }
 
 }
