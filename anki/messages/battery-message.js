@@ -23,7 +23,7 @@ class BatteryMessage extends CarMessage {
 
     constructor(msgID, msgName, msgTimestamp, carBatteryLevel) {
         super(msgID, msgName, msgTimestamp);
-        this.carBatteryLevel = carBatteryLevel;
+        this.carBatteryLevel = Math.round(carBatteryLevel);
     }
 }
 

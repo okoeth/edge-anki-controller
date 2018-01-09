@@ -100,7 +100,7 @@ class Kafka extends EventEmitter {
                 // this defaults to -1 - which will use librdkafka's default partitioner (consistent random for keyed messages, random for unkeyed messages)
                 0,
                 // Message to send. Must be a buffer
-                new Buffer(message)
+                new Buffer(JSON.stringify(message))
             );
         } catch (err) {
             console.error('A problem occurred when sending our message');

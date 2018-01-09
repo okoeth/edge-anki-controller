@@ -110,7 +110,8 @@ config.read(options['config'], function (carNo, carId, startlane) {
 
                             // When car gets new message
                             car.on('messageReceived', function(message) {
-                                kafka.sendMessage(JSON.stringify(message));
+                                //kafka.sendMessage(JSON.stringify(message));
+                                kafka.sendMessage(message);
                             });
                         }
                     }

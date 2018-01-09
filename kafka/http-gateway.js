@@ -24,6 +24,7 @@ var bodyParser = require('body-parser');
 var app = express();
 const io = require('socket.io-client');
 const WebSocket = require('ws');
+const PositionUpdateMessage = require('../anki/messages/position-update-message');
 
 
 class HttpGateway extends EventEmitter {
@@ -32,13 +33,9 @@ class HttpGateway extends EventEmitter {
         super();
         var that = this;
 
-        var url = 'http://localhost/status';
-        that.socket = new WebSocket('ws://localhost:8003/status');
 
-        that.socket.on('open', function open() {
-            console.log("INFO: Connected to websocket on " + url);
-        });
-
+        this.connectToSocket();
+        setInterval(this.checkConnection.bind(this), 5000)
 
         //setup a http listener on port 900<car-no> for cmds
         app.use(bodyParser.text())
@@ -56,8 +53,63 @@ class HttpGateway extends EventEmitter {
         });
     }
 
+    connectToSocket() {
+        try {
+            var that = this;
+            console.log("INFO: Trying to connect to websocket");
+
+            that.socket = new WebSocket('ws://localhost:8003/status');
+
+            that.socket.on('open', function open() {
+                console.log("INFO: Connected to websocket");
+
+                if (that.connectInterval !== undefined) {
+                    clearInterval(that.connectInterval);
+                    that.connectInterval = undefined;
+                }
+            });
+
+            that.socket.on('error', function(error) {
+                if (error != null) {
+                    console.log('%s', error);
+                    that.socket.close();
+                    that.socket = null;
+                }
+            });
+
+            that.socket.on('disconnect', function(error) {
+                console.log("INFO: Disconnected from socket");
+            });
+        } catch(error) {
+            console.error(error);
+        }
+    }
+
+    checkConnection() {
+        try {
+            if (this.socket === null || this.socket.readyState !== WebSocket.OPEN) {
+                if (this.connectInterval === undefined) {
+                    this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
+                }
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     sendMessage(message) {
-        console.log("INFO: Http SendMessage invoked: ", message);
+        if(message instanceof PositionUpdateMessage) {
+            var csvMessage = message.toCSV();
+            console.log("INFO: Http SendMessage invoked: ", csvMessage);
+
+            if(this.socket.readyState == WebSocket.OPEN) {
+                this.socket.send(csvMessage);
+            }
+            else {
+                console.error('ERROR: A problem occurred when sending our message to adas');
+            }
+        }
+
         try {
             /*var request = new http.ClientRequest({
                 hostname: "localhost",
@@ -76,10 +128,7 @@ class HttpGateway extends EventEmitter {
 
             request.end(message);*/
 
-            if(this.socket.readyState == 1)
-                this.socket.send(message);
-            else
-                console.error('ERROR: A problem occurred when sending our message to adas');
+
         } catch (err) {
             console.error('ERROR: A problem occurred when sending our message to adas');
             console.error(err);

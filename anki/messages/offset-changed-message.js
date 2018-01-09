@@ -23,7 +23,7 @@ class OffsetChangedMessage extends CarMessage {
 
     constructor(msgID, msgName, msgTimestamp, laneOffset) {
         super(msgID, msgName, msgTimestamp);
-        this.laneOffset = laneOffset;
+        this.laneOffset = Math.round(laneOffset);
     }
 }
 

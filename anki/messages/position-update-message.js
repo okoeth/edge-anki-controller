@@ -25,8 +25,8 @@ class PositionUpdateMessage extends CarMessage {
         super(msgID, msgName, msgTimestamp);
         this.posLocation = posLocation;
         this.posTileNo = posTileNo;
-        this.laneOffset = laneOffset;
-        this.carSpeed = carSpeed;
+        this.laneOffset = Math.round(laneOffset);
+        this.carSpeed = Math.round(carSpeed);
         //laneNo has to be calculated
         this.laneNo = null;
         this.laneLength = null;
@@ -34,6 +34,26 @@ class PositionUpdateMessage extends CarMessage {
         //internal position has to be calculated
         this.posOptions = [];
         this.maxTileNo = 0;
+    }
+
+    toCSV() {
+        var csvString = '';
+        csvString += this.msgID + ";"
+        csvString += this.msgTimestamp.toISOString() + ";"
+        csvString += this.carNo + ";";
+        csvString += this.posLocation + ";"
+        csvString += this.posTileNo + ";"
+        csvString += this.carSpeed + ";"
+        csvString += this.laneNo + ";"
+        csvString += this.laneLength + ";"
+        csvString += this.maxTileNo + ";"
+
+        for(var index in this.posOptions){
+            csvString += this.posOptions[index].optProbability + "," + this.posOptions[index].optTileNo + ":"
+        }
+        csvString += ";";
+
+        return csvString;
     }
 }
 
