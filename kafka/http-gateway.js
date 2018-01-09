@@ -26,6 +26,7 @@ const io = require('socket.io-client');
 const WebSocket = require('ws');
 const PositionUpdateMessage = require('../anki/messages/position-update-message');
 
+var httpWebsocket = process.env.HTTP_WEBSOCKET;
 
 class HttpGateway extends EventEmitter {
 
@@ -33,6 +34,10 @@ class HttpGateway extends EventEmitter {
         super();
         var that = this;
 
+        if (httpWebsocket==null || httpWebsocket==''){
+            console.log('Using 127.0.0.1 as default http websocket server.');
+            httpWebsocket='127.0.0.1'
+        }
 
         this.connectToSocket();
         setInterval(this.checkConnection.bind(this), 5000)
@@ -58,7 +63,7 @@ class HttpGateway extends EventEmitter {
             var that = this;
             console.log("INFO: Trying to connect to websocket");
 
-            that.socket = new WebSocket('ws://localhost:8003/status');
+            that.socket = new WebSocket('ws://' + httpWebsocket + ' :8003/status');
 
             that.socket.on('open', function open() {
                 console.log("INFO: Connected to websocket");
@@ -102,7 +107,7 @@ class HttpGateway extends EventEmitter {
             var csvMessage = message.toCSV();
             console.log("INFO: Http SendMessage invoked: ", csvMessage);
 
-            if(this.socket.readyState == WebSocket.OPEN) {
+            if(this.socket !== null && this.socket.readyState == WebSocket.OPEN) {
                 this.socket.send(csvMessage);
             }
             else {

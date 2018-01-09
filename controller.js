@@ -131,34 +131,38 @@ var cli = readline.createInterface({
 });
 
 cli.on('line', function (cmd) {
-	if (cmd == 'help') {
-		console.log(prepareMessages.doc());
-	}
-	else if (cmd == 'sim') {
-		simulated = '{ "status_id" : "25", "status_name" : "Version", "version" : 42 }'
-		console.log("Simulate: " + simulated);
-		kafka.sendMessage(simulated,
-			function (err, data) {
-				console.log(data);
-			});
-	}
-	else if(cmd.indexOf('scan') > -1) {
-		console.log("INFO: Scan command from CLI");
-        var commandArray;
-		commandArray = cmd.split(' ');
-		var countTiles = 0;
-		if (commandArray.length > 0) {
-			countTiles = parseInt(commandArray[1]);
+	try {
+		if (cmd == 'help') {
+			console.log(prepareMessages.doc());
 		}
+		else if (cmd == 'sim') {
+			simulated = '{ "status_id" : "25", "status_name" : "Version", "version" : 42 }'
+			console.log("Simulate: " + simulated);
+			kafka.sendMessage(simulated,
+				function (err, data) {
+					console.log(data);
+				});
+		}
+		else if(cmd.indexOf('scan') > -1) {
+			console.log("INFO: Scan command from CLI");
+			var commandArray;
+			commandArray = cmd.split(' ');
+			var countTiles = 0;
+			if (commandArray.length > 0) {
+				countTiles = parseInt(commandArray[1]);
+			}
 
-		if(countTiles > 0) {
-            var trackScanner = new TrackScanner(car, options['trackConfig']);
-            trackScanner.scanTrack(countTiles);
-        }
-	}
-	else {
-		console.log("INFO: Send command from CLI");
-		car.sendCommand(cmd);
+			if(countTiles > 0) {
+				var trackScanner = new TrackScanner(car, options['trackConfig']);
+				trackScanner.scanTrack(countTiles);
+			}
+		}
+		else {
+			console.log("INFO: Send command from CLI");
+			car.sendCommand(cmd);
+		}
+	} catch(error) {
+		console.error(error);
 	}
 });
 
@@ -177,4 +181,8 @@ function exitHandler(options, err) {
 	if (kafka) {
 	    kafka.disconnect();
     }
+
+    if(err !== undefined) {
+		console.error(err);
+	}
 }
