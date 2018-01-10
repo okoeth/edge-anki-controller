@@ -49,78 +49,82 @@ var lane;
 
 // Read properties and start receiving BLE messages
 config.read(options['config'], function (carNo, carId, startlane) {
-	// Read properties
-	if (!carNo && isNaN(carNo * 1) && carNo > 0 && carNo < 5) {
-		console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
-		process.exit(1);
-	}
-	if (!carId) {
-		console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
-		process.exit(1);
-	}
-	//setup kafka
-	if (options['kafka'] !== undefined) {
-		kafka = kafka_factory.create(options['kafka'], carNo, carMessageGateway);
-	} else {
-		kafka = kafka_factory.create("multi", carNo, carMessageGateway);
-	}
-
-	kafka.on('message', function(message) {
-		if (car !== undefined && message !== undefined) {
-		   car.sendCommand(message);
-		} else {
-			console.log('WARNING: Ignoring command... car not ready: ', message);
-		}
-	});
-
-    configurationLoader = new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function(trackConfiguration) {
-        //setup noble
-        if (options['noble']) {
-            noble = noble_factory.create(options['noble'], carId, trackConfiguration);
-        } else {
-            noble = noble_factory.create("noble", carId, trackConfiguration);
+	try {
+        // Read properties
+        if (!carNo && isNaN(carNo * 1) && carNo > 0 && carNo < 5) {
+            console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
+            process.exit(1);
         }
-        lane = startlane;
+        if (!carId) {
+            console.log('ERROR: Define carid in a properties file and pass in the name of the file as argv');
+            process.exit(1);
+        }
+        //setup kafka
+        if (options['kafka'] !== undefined) {
+            kafka = kafka_factory.create(options['kafka'], carNo, carMessageGateway);
+        } else {
+            kafka = kafka_factory.create("multi", carNo, carMessageGateway);
+        }
 
-        noble.on('stateChange', function(state) {
-            if (state === 'poweredOn') {
-                var notDiscoveredTimeout = setTimeout(function() {
-                    console.log("WARNING: Could not discover car");
-                    process.exit();
-                }, 10000);
-
-                console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
-                noble.startScanning();
-                setTimeout(function () {
-                    noble.stopScanning();
-                }, 2000);
-
-                noble.on('discover', function (peripheral) {
-                    console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
-                    if (peripheral.id === carId) {
-                        clearTimeout(notDiscoveredTimeout);
-                        noble.stopScanning();
-
-                        var advertisement = peripheral.advertisement;
-                        var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
-                        if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
-                            console.log('INFO: Car discovered. ID: ' + peripheral.id);
-                            car = new Car(carNo, startlane, trackConfiguration);
-                            car.setPeripheral(peripheral);
-
-                            // When car gets new message
-                            car.on('messageReceived', function(message) {
-                                //kafka.sendMessage(JSON.stringify(message));
-                                kafka.sendMessage(message);
-                            });
-                        }
-                    }
-                });
+        kafka.on('message', function (message) {
+            if (car !== undefined && message !== undefined) {
+                car.sendCommand(message);
             } else {
-                noble.stopScanning();
+                console.log('WARNING: Ignoring command... car not ready: ', message);
             }
         });
-    });
+
+        configurationLoader = new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function (trackConfiguration) {
+            //setup noble
+            if (options['noble']) {
+                noble = noble_factory.create(options['noble'], carId, trackConfiguration);
+            } else {
+                noble = noble_factory.create("noble", carId, trackConfiguration);
+            }
+            lane = startlane;
+
+            noble.on('stateChange', function (state) {
+                if (state === 'poweredOn') {
+                    var notDiscoveredTimeout = setTimeout(function () {
+                        console.log("WARNING: Could not discover car");
+                        process.exit();
+                    }, 10000);
+
+                    console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
+                    noble.startScanning();
+                    setTimeout(function () {
+                        noble.stopScanning();
+                    }, 2000);
+
+                    noble.on('discover', function (peripheral) {
+                        console.log('INFO: Peripheral discovered with ID: ' + peripheral.id);
+                        if (peripheral.id === carId) {
+                            clearTimeout(notDiscoveredTimeout);
+                            noble.stopScanning();
+
+                            var advertisement = peripheral.advertisement;
+                            var serviceUuids = JSON.stringify(peripheral.advertisement.serviceUuids);
+                            if (serviceUuids.indexOf("be15beef6186407e83810bd89c4d8df4") > -1) {
+                                console.log('INFO: Car discovered. ID: ' + peripheral.id);
+                                car = new Car(carNo, startlane, trackConfiguration);
+                                car.setPeripheral(peripheral);
+
+                                // When car gets new message
+                                car.on('messageReceived', function (message) {
+                                    //kafka.sendMessage(JSON.stringify(message));
+                                    kafka.sendMessage(message);
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    noble.stopScanning();
+                }
+            });
+        });
+    } catch(error) {
+		console.error(error);
+	}
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +189,7 @@ function exitHandler(options, err) {
         delete kafka;
     }
 
-    if(err !== 0) {
+    if(err != undefined && err !== 0) {
 		console.error(err);
 	}
 
