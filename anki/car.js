@@ -154,7 +154,7 @@ class Car extends EventEmitter {
                                                         }
                                                     }
                                                     else if (message instanceof PositionUpdateMessage) {
-                                                        console.log('INFO: TileID:', that.tileId);
+                                                        console.log('INFO: Old TileID:', that.tileId);
 
                                                         message.posOptions =
                                                             that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);

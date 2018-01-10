@@ -93,15 +93,17 @@ class Kafka extends EventEmitter {
     sendMessage(message) {
         console.log("INFO: Kafka SendMessage invoked: ", message);
         try {
-            this.kafkaProducer.produce(
-                // Topic to send the message to
-                'Status',
-                // optionally we can manually specify a partition for the message
-                // this defaults to -1 - which will use librdkafka's default partitioner (consistent random for keyed messages, random for unkeyed messages)
-                0,
-                // Message to send. Must be a buffer
-                new Buffer(JSON.stringify(message))
-            );
+            if(this.kafkaProducer.isConnected()) {
+                this.kafkaProducer.produce(
+                    // Topic to send the message to
+                    'Status',
+                    // optionally we can manually specify a partition for the message
+                    // this defaults to -1 - which will use librdkafka's default partitioner (consistent random for keyed messages, random for unkeyed messages)
+                    0,
+                    // Message to send. Must be a buffer
+                    new Buffer(JSON.stringify(message))
+                );
+            }
         } catch (err) {
             console.error('A problem occurred when sending our message');
             console.error(err);
