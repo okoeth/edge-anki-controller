@@ -44,7 +44,7 @@ class TilePositionCalculator {
         //we know where the car was previously,
         //we search the next tile with the right anki tile id
         if(previousTileIndex > -1) {
-            console.log("after previousTileIndey > -1");
+            console.log("after previousTileIndex > -1");
 
             var previousTileId = this.trackConfiguration.tiles[previousTileIndex].id;
             console.log("after previousTileId");
@@ -92,7 +92,9 @@ class TilePositionCalculator {
         }
         //We have no info about our last position, get all possibilities
         else {
+            console.log("after else");
             for (var index in this.trackConfiguration.tiles) {
+                console.log("loop this.trackConfiguration.tiles " + index);
                 var tile = this.trackConfiguration.tiles[index];
 
                 if (tile.realId === ankiTileId)
@@ -100,9 +102,11 @@ class TilePositionCalculator {
             }
 
             //set equal probabilities for all tiles
+            console.log("before probability");
             for(var index = 0; index < possibleTiles.length; index++) {
                 possibleTiles[index].optProbability = ((1/possibleTiles.length)*100)|0;
             }
+            console.log("after probability");
             return possibleTiles;
         }
     }
