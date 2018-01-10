@@ -181,7 +181,7 @@ process.stdin.resume();
 // Graceful exist
 process.on('exit', exitHandler.bind(null, { cleanup: true }));
 process.on('SIGINT', exitHandler.bind(null, { exit: true }));
-process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
+//process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 function exitHandler(options, err) {
 	if (car) {

@@ -161,34 +161,44 @@ class Car extends EventEmitter {
                                                         message.posOptions =
                                                             that.positionCalculator.getCarPosition(message.posTileNo, that.currentTileIndex);
 
+                                                        console.log("DEBUG: after posOptions");
                                                         if (message.posTileNo != CROSSING_TILE_ID) {
-
+                                                            console.log("DEBUG: is crossing");
                                                             message.laneNo = that.positionCalculator.getLaneNo(message.posOptions, message.posLocation);
+                                                            console.log("DEBUG: after getLaneNo");
                                                             message.maxTileNo = that.positionCalculator.getMaxTileNo();
-
+                                                            console.log("DEBUG: after maxTileNo");
                                                             //If laneNo not found, take the old one
                                                             if (!message.laneNo && that.laneNo !== undefined) {
+                                                                console.log("DEBUG: no laneNo found");
                                                                 message.laneNo = that.laneNo;
                                                             }
-
+                                                            console.log("DEBUG: after settings lane");
                                                             if (message.posOptions.length == 1) {
+                                                                console.log("DEBUG: posOptionsLength is 1");
                                                                 that.currentTileIndex = that.positionCalculator.getIndexFromTileId(message.posOptions[0].optTileNo);
+                                                                console.log("DEBUG: after getIndexFromTileId");
                                                                 that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
-
+                                                                console.log("DEBUG: after getTileByIndex");
                                                                 message.posTileType = that.currentTile.type;
                                                                 if (message.laneNo !== undefined) {
+                                                                    console.log("DEBUG: after laneNo not undefined");
                                                                     message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
-
+                                                                    console.log("DEBUG: after getLaneLength");
                                                                     //Correct the lane every n-1 th tile
                                                                     if(that.currentTileIndex % (message.maxTileNo-1) === 0 && !that.isCurrentlyChangingLane) {
+                                                                        console.log("DEBUG: after correction of lane");
+
                                                                         console.log("DEBUG: Correcting lane to " + message.laneNo);
                                                                         that.sendCommand("c " + message.laneNo);
                                                                     }
                                                                 }
                                                             }
-
+                                                            console.log("DEBUG: after posOptionLengh is 1");
                                                             message.posLocation = parseInt(message.posLocation);
+                                                            console.log("DEBUG: after set posLocation");
                                                             that.updateLocation(message);
+                                                            console.log("DEBUG: after updateLocation");
 
                                                         } else {
                                                             message.maxTileNo = that.positionCalculator.getMaxTileNo();
