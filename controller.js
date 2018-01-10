@@ -118,8 +118,13 @@ config.read(options['config'], function (carNo, carId, startlane) {
                         }
                     });
                 } else {
+                    console.error("Noble sent state change: " + state);
                     noble.stopScanning();
                 }
+            });
+
+            noble.on('warning', function(warning) {
+                console.error("Noble sent warning: " + warning);
             });
         });
     } catch(error) {

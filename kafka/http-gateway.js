@@ -36,7 +36,9 @@ class HttpGateway extends EventEmitter {
 
         if (httpWebsocket==null || httpWebsocket==''){
             console.log('Using localhost as default http websocket server.');
-            httpWebsocket='localhost'
+            httpWebsocket='localhost:8003'
+        } else {
+            console.log('Using ' + httpWebsocket + 'as http websocket server.');
         }
 
         this.connectToSocket();
@@ -63,7 +65,7 @@ class HttpGateway extends EventEmitter {
             var that = this;
             console.log("INFO: Trying to connect to websocket");
 
-            that.socket = new WebSocket('ws://' + httpWebsocket + ':8003/status');
+            that.socket = new WebSocket('ws://' + httpWebsocket + '/status');
 
             that.socket.on('open', function open() {
                 console.log("INFO: Connected to websocket");

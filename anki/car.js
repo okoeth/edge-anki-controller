@@ -119,6 +119,8 @@ class Car extends EventEmitter {
                                     console.log('INFO: Read characteristic');
                                     that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
 
+
+
                                         var message = that.bluetoothMessageExtractor.generateMessage(data);
                                         try {
                                             if (message !== undefined) {
