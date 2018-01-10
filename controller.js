@@ -175,14 +175,19 @@ process.on('SIGINT', exitHandler.bind(null, { exit: true }));
 process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
 
 function exitHandler(options, err) {
-	if (car)
-		car.disconnect();
+	if (car) {
+        car.disconnect();
+        delete car
+    }
 
 	if (kafka) {
 	    kafka.disconnect();
+        delete kafka;
     }
 
-    if(err !== undefined) {
+    if(err !== 0) {
 		console.error(err);
 	}
+
+	process.exit()
 }
