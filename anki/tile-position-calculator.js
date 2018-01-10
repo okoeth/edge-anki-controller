@@ -32,11 +32,11 @@ class TilePositionCalculator {
 
     getCarPosition(ankiTileId, previousTileIndex) {
 
-        console.log("entering getCarPosition");
+        console.debug("entering getCarPosition");
 
         if(!this.trackConfiguration)
             return -1;
-        console.log("after this.trackConfiguration");
+        console.debug("after this.trackConfiguration");
 
         //find all possible tiles (anki tiles have no unique id)
         var possibleTiles = [];
@@ -44,50 +44,55 @@ class TilePositionCalculator {
         //we know where the car was previously,
         //we search the next tile with the right anki tile id
         if(previousTileIndex > -1) {
-            console.log("after previousTileIndex > -1");
+            console.debug("after previousTileIndex > -1");
 
             var previousTileId = this.trackConfiguration.tiles[previousTileIndex].id;
-            console.log("after previousTileId");
+            console.debug("after previousTileId");
 
             var previousTileFound = false;
             var index = 0;
             var loopsCompleted = 0;
+            var countTiles = Object.keys(this.trackConfiguration.tiles).length;
+            if (!countTiles) {
+                countTiles = 8;
+            }
 
-            while(true) {
-                console.log("entering while true");
-                console.log("index:" + index);
+            //This condition just prevents an endless loop
+            while(index <= 16) {
+                console.debug("entering while true");
+                console.debug("index:" + index);
 
-                var normalizedIndex = index % Object.keys(this.trackConfiguration.tiles).length;
-                console.log("after normalized Index");
+                var normalizedIndex = index % countTiles;
+                console.debug("after normalized Index");
 
                 //Safety first, should anyway not happen
                 if(loopsCompleted >= 2) {
-                    console.log("after loops completed >= 2");
+                    console.debug("after loops completed >= 2");
                     return [];
                 }
-                console.log("after loops completed < 2");
+                console.debug("after loops completed < 2");
 
                 //We found the tile
                 if(this.trackConfiguration.tiles[normalizedIndex].id === previousTileId) {
-                    console.log("after this.trackConfiguration.tiles[normalizedIndex].id === previousTileId");
+                    console.debug("after this.trackConfiguration.tiles[normalizedIndex].id === previousTileId");
                     previousTileFound = true;
                 }
-                console.log("after this.trackConfiguration.tiles[normalizedIndex].id: " + previousTileFound);
+                console.debug("after this.trackConfiguration.tiles[normalizedIndex].id: " + previousTileFound);
 
                 if (previousTileFound && this.trackConfiguration.tiles[normalizedIndex].realId == ankiTileId) {
-                    console.log("after previousTileFound && this.trackConfiguration.tiles[normalizedIndex].realId == ankiTileId: ");
+                    console.debug("after previousTileFound && this.trackConfiguration.tiles[normalizedIndex].realId == ankiTileId: ");
 
                         return [ new PosOption(this.trackConfiguration.tiles[normalizedIndex].id, 1)];
                 }
-                console.log("after nothing found ");
+                console.debug("after nothing found ");
 
                 index++;
-                if(index % this.trackConfiguration.tiles.length === 0) {
-                    console.log("after loops completed: ");
+                if(index % countTiles === 0) {
+                    console.debug("after loops completed: ");
                     loopsCompleted++;
                 }
 
-                console.log("next loop");
+                console.debug("next loop");
             }
         }
         //We have no info about our last position, get all possibilities
