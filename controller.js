@@ -157,13 +157,17 @@ cli.on('line', function (cmd) {
 			var commandArray;
 			commandArray = cmd.split(' ');
 			var countTiles = 0;
+			var trackType = "NORMAL";
 			if (commandArray.length > 0) {
 				countTiles = parseInt(commandArray[1]);
 			}
+			if (commandArray.length > 1) {
+                trackType = commandArray[2];
+            }
 
 			if(countTiles > 0) {
 				var trackScanner = new TrackScanner(car, options['trackConfig']);
-				trackScanner.scanTrack(countTiles);
+				trackScanner.scanTrack(countTiles, trackType);
 			}
 		}
 		else {

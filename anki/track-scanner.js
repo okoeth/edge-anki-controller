@@ -24,6 +24,8 @@ var TrackConfiguration = require('./track-configuration');
 var Lane = require('./lane');
 var fs = require('fs');
 
+const TRACK_TYPE_CROSSING = "CROSSING"
+
 class TrackScanner {
 
     constructor(car, filename) {
@@ -39,6 +41,7 @@ class TrackScanner {
         this.currentCycle = 0;
         this.countTiles = 0;
         this.laneOffsets = [68, 23, -23, -68];
+        this.inverseCurve = false;
 
         this.knownTiles = {
             "17": new Tile(undefined, 17, "CURVE"),
@@ -103,10 +106,26 @@ class TrackScanner {
                             }
                             else {
                                 this.tiles[this.tileIndex] = new Tile(this.tileIndex, message.posTileNo, knownTile.type);
-                                this.tiles[this.tileIndex]["lane1"] = new Lane(knownTile.lane1.sizeMM);
-                                this.tiles[this.tileIndex]["lane2"] = new Lane(knownTile.lane2.sizeMM);
-                                this.tiles[this.tileIndex]["lane3"] = new Lane(knownTile.lane3.sizeMM);
-                                this.tiles[this.tileIndex]["lane4"] = new Lane(knownTile.lane4.sizeMM);
+
+                                var lastTileIndex = (this.tileIndex-1) % this.countTiles;
+                                var lastTile = this.tiles[lastTileIndex]
+
+                                if(lastTile !== undefined && lastTile.type == "CROSSING") {
+                                    this.inverseCurve = !this.inverseCurve;
+                                }
+
+                                //If there is a crossing, the lanes get inverted
+                                if (this.inverseCurve) {
+                                    this.tiles[this.tileIndex]["lane1"] = new Lane(knownTile.lane4.sizeMM);
+                                    this.tiles[this.tileIndex]["lane2"] = new Lane(knownTile.lane3.sizeMM);
+                                    this.tiles[this.tileIndex]["lane3"] = new Lane(knownTile.lane2.sizeMM);
+                                    this.tiles[this.tileIndex]["lane4"] = new Lane(knownTile.lane1.sizeMM);
+                                } else {
+                                    this.tiles[this.tileIndex]["lane1"] = new Lane(knownTile.lane1.sizeMM);
+                                    this.tiles[this.tileIndex]["lane2"] = new Lane(knownTile.lane2.sizeMM);
+                                    this.tiles[this.tileIndex]["lane3"] = new Lane(knownTile.lane3.sizeMM);
+                                    this.tiles[this.tileIndex]["lane4"] = new Lane(knownTile.lane4.sizeMM);
+                                }
                             }
                         } else {
                             knownTile = this.knownTiles[message.posTileNo];
@@ -167,13 +186,20 @@ class TrackScanner {
         }
     }
 
-    scanTrack(countTiles) {
+    scanTrack(countTiles, type) {
         //Let the car drive slowly (150)
         this.car.sendCommand("s " + this.lowSpeed);
 
         console.log('INFO: Starting scan');
 
         this.countTiles = countTiles;
+
+        if(type === TRACK_TYPE_CROSSING) {
+            this.type = TRACK_TYPE_CROSSING;
+        }
+        else {
+            this.type = "NORMAL";
+        }
 
         //Get the position and transition messages
         this.car.on('messageReceived', this.messageReceived.bind(this));
