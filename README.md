@@ -42,7 +42,8 @@ For running Kafka in Docker see TODO
 
 ### Configuration of Anki track
 
-You can create a configuration file with the track scanner. Simply run the command scan <no_of_tiles> when you started controller.js. <no_of_tiles> should be set to the number of tiles that you have on your track. You can change the filename that will be generated with -t option (view Command line argument).
+You can create a configuration file with the track scanner. Simply run the command scan <no_of_tiles> <type-of-track> when you started controller.js. <no_of_tiles> should be set to the number of tiles that you have on your track. You can change the filename that will be generated with -t option (view Command line argument).
+The <type-of-track> argument can be CROSSING or NORMAL. It is important, because the lane length of the curves are inverted after driving over a crossing.
 
 ## Running locally
 The service can be started locally by running
