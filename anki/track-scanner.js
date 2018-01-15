@@ -42,6 +42,7 @@ class TrackScanner {
         this.countTiles = 0;
         this.laneOffsets = [68, 23, -23, -68];
         this.inverseCurve = false;
+        this.init = true;
 
         this.knownTiles = {
             "17": new Tile(undefined, 17, "CURVE"),
@@ -110,9 +111,10 @@ class TrackScanner {
                                 var lastTileIndex = (this.tileIndex-1) % this.countTiles;
                                 var lastTile = this.tiles[lastTileIndex]
 
-                                if(lastTile !== undefined && lastTile.type == "CROSSING") {
+                                if(!this.init && lastTile.type == "CROSSING") {
                                     this.inverseCurve = !this.inverseCurve;
                                 }
+                                this.init = false;
 
                                 //If there is a crossing, the lanes get inverted
                                 if (this.inverseCurve) {
