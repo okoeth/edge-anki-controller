@@ -27,6 +27,7 @@ const WebSocket = require('ws');
 const PositionUpdateMessage = require('../anki/messages/position-update-message');
 
 var httpWebsocket = process.env.HTTP_WEBSOCKET;
+var httpReceiverPort = process.env.HTTP_RECEIVER_PORT;
 
 class HttpGateway extends EventEmitter {
 
@@ -41,6 +42,13 @@ class HttpGateway extends EventEmitter {
             console.log('Using ' + httpWebsocket + 'as http websocket server.');
         }
 
+        if (httpReceiverPort==null || httpReceiverPort==''){
+            console.log('Using 809' + carNo +  'as default http receiver port.');
+            httpReceiverPort='809' + carNo;
+        } else {
+            console.log('Using ' + httpReceiverPort + ' as http receiver port.');
+        }
+
         this.connectToSocket();
         setInterval(this.checkConnection.bind(this), 5000)
 
@@ -48,15 +56,14 @@ class HttpGateway extends EventEmitter {
         app.use(bodyParser.text())
 
 
-        var port = "809" + carNo;
         app.post('/cmd', function (req, res) {
             console.log("INFO: Received post request at " + new Date() + ":" + req.body);
             that.emit('message', req.body);
             res.send('Received command');
         });
 
-        app.listen(port, function () {
-            console.log('INFO: Http listening on port ' + port);
+        app.listen(httpReceiverPort, function () {
+            console.log('INFO: Http listening on port ' + httpReceiverPort);
         });
     }
 
