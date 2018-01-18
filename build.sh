@@ -24,5 +24,5 @@ if [ x = x$DOCKER_USER ]; then
 	exit 1
 fi
 
-docker build -t $DOCKER_USER/mwc-controller .
-docker push $DOCKER_USER/mwc-controller
+docker build -t $DOCKER_USER/edge-anki-controller .
+docker push $DOCKER_USER/edge-anki-controller

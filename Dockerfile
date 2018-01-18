@@ -33,6 +33,7 @@ RUN apt-get -y install git python-software-properties curl bluez bluetooth build
 RUN curl -sL https://deb.nodesource.com/setup_9.x -o node_install.sh
 RUN bash node_install.sh
 RUN apt-get -y install nodejs
+RUN apt-get -y install g++ libusb-1.0-0-dev libudev-dev sasl2-bin
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -40,16 +41,17 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY package*.json ./
 
-RUN npm install
-
 # If you are building your code for production
 # RUN npm install --only=production
 
 # Bundle app source
 COPY . .
 
+#RUN npm install node-rdkafka
+RUN npm install
+
 EXPOSE 8090
 
 ENTRYPOINT ["node", "controller.js"]
 
-CMD ["-c", "config/config-car1-home-ok-linux.properties", "-t", "config/track-config-home-ok.json", "-k", "mock"]
+CMD ["-c", "mounted-config/config-car1-i3-cloudwan.properties", "-t", "mounted-config/eight-i3.json", "-k", "mock"]

@@ -11,7 +11,7 @@
     "fs": "0.0.1-security",
     "kafka-node": "2.3.0",
     "noble": "git+https://github.com/PolideaInternal/noble.git#macos_highsierra",
-    "node-rdkafka": "^2.2.1",
+    "node-rdkafka": "git+https://github.com/Blizzard/node-rdkafka.git#22c713b2d9dfbb2b0ef9d42bf2b890c4ed9e4133",
     "properties": "1.2.1",
     "socket.io": "^2.0.4",
     "ws": "^4.0.0"

@@ -43,7 +43,7 @@ class HttpGateway extends EventEmitter {
         }
 
         if (httpReceiverPort==null || httpReceiverPort==''){
-            console.log('Using 809' + carNo +  'as default http receiver port.');
+            console.log('Using 809' + carNo +  ' as default http receiver port.');
             httpReceiverPort='809' + carNo;
         } else {
             console.log('Using ' + httpReceiverPort + ' as http receiver port.');
