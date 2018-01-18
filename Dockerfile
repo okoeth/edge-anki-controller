@@ -54,4 +54,4 @@ EXPOSE 8090
 
 ENTRYPOINT ["node", "controller.js"]
 
-CMD ["-c", "mounted-config/config-car1-i3-cloudwan.properties", "-t", "mounted-config/eight-i3.json"]
+CMD ["-c", "mounted-config/config-car.properties", "-t", "mounted-config/eight-i3.json"]
