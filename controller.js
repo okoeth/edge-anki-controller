@@ -46,6 +46,7 @@ const options = commandLineArgs(optionDefinitions)
 
 var car;
 var lane;
+var that = this;
 
 // Read properties and start receiving BLE messages
 config.read(options['config'], function (carNo, carId, startlane) {
@@ -68,7 +69,15 @@ config.read(options['config'], function (carNo, carId, startlane) {
 
         kafka.on('message', function (message) {
             if (car !== undefined && message !== undefined) {
+                if(message.indexOf('swap') > -1) {
+                    swapCar(message);
+                }
+
                 car.sendCommand(message);
+            } else if (message !== undefined) {
+                if(message.indexOf('swap') > -1) {
+                    swapCar(message);
+                }
             } else {
                 console.log('WARNING: Ignoring command... car not ready: ', message);
             }
@@ -170,6 +179,17 @@ cli.on('line', function (cmd) {
 				trackScanner.scanTrack(countTiles, trackType);
 			}
 		}
+		else if(cmd.indexOf("swap") > -1) {
+            console.log("INFO: swap command from CLI");
+            var commandArray;
+            commandArray = cmd.split(' ');
+            var newBluetoothId = '';
+            if (commandArray.length > 0) {
+                newBluetoothId = commandArray[1];
+            }
+
+            config.write(car.carNo, newBluetoothId, car.currentTileIndex, options['config']);
+        }
 		else {
 			console.log("INFO: Send command from CLI");
 			car.sendCommand(cmd);
@@ -203,4 +223,19 @@ function exitHandler(options, err) {
 	}
 
 	process.exit()
+}
+
+function swapCar(command) {
+    console.log("INFO: swap command");
+    var commandArray;
+    commandArray =  command.split(' ');
+    var newBluetoothId = '';
+    if (commandArray.length > 0) {
+        newBluetoothId = commandArray[1];
+        config.write(car.carNo, newBluetoothId, car.currentTileIndex, options['config']);
+    } else {
+        console.log("INFO: No valid swap command");
+    }
+
+
 }

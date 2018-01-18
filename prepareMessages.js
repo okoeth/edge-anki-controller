@@ -190,7 +190,7 @@ module.exports = function() {
 	    message = new Buffer(2);
 	    message.writeUInt8(0x01, 0);
 	    message.writeUInt8(0x0d, 1);                   
-	  }	
+	  }
 
 	  return message; 	
 	}
