@@ -18,20 +18,48 @@
 // DEALINGS IN THE SOFTWARE.
 
 var properties = require('properties');
+var fs = require('fs');
 
 ////////////////////////////////////////////////////////////////////////////////
 // Read configuration file
 module.exports = function() {
     return {
+      "write": function(carNo, carInitBluetoothId, carLaneNo, propertiesFileName) {
+          var propertiesString = "carno=" + carNo + "\n";
+          propertiesString += "carid=" + carInitBluetoothId + "\n";
+          propertiesString += "startlane=" + carLaneNo + "\n";
+
+          fs.writeFileSync('./' + propertiesFileName, propertiesString);
+          console.log("INFO: Config file written to ./" + propertiesFileName + ". Shutting down.");
+          process.exit(0);
+      },
       "read" : function(propertiesFileName, callback) {
+        var that = this;
         if (!propertiesFileName) {
           console.error('Provide configuration filename as parameter, e.g. node controller.js config-car1.properties');
           process.exit(1);
         }
         properties.parse('./' + propertiesFileName, {path: true}, function(err, cfg) {
           if (err) {
-            console.error('Error parsing the configuration file - see config-sample.properties for an example');
-            process.exit(1);
+            if(err.code == 'ENOENT') {
+                console.log("INFO: Initial config does not exist, writing config from environment variables");
+                var carNo = process.env.CAR_NO;
+                var carInitBluetoothId = process.env.CAR_INIT_BLUETOOTH_ID;
+                var carLaneNo = process.env.CAR_LANE_NO;
+
+                console.log("INFO: Writing config file with ", carNo, carInitBluetoothId, carLaneNo);
+
+                if(!carNo || !carInitBluetoothId || !carLaneNo) {
+                  console.error("Please set the environment variables CAR_NO, CAR_INIT_BLUETOOTH_ID and CAR_LANE_NO");
+                  process.exit(1)
+                }
+
+                that.write(carNo, carInitBluetoothId, carLaneNo, propertiesFileName);
+            }
+            else {
+                console.error('Error parsing the configuration file: ', err);
+                process.exit(1);
+            }
           }
           if (!cfg.carid) {
             console.error('Error parsing car id of the configuration file - see config-sample.properties for an example');
