@@ -43,6 +43,7 @@ class MultiGateway extends EventEmitter {
 
     disconnect() {
         this.kafkaGateway.disconnect();
+        this.httpGateway.disconnect();
     }
 
 }
