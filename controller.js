@@ -39,7 +39,7 @@ const optionDefinitions = [
     { name: 'config', alias: 'c', type: String, defaultValue: "config-car1.properties" },
     { name: 'kafka', alias: 'k', type: String },
     { name: 'noble', alias: 'n', type: String },
-	{ name: 'trackConfig', alias: 't', type: String, defaultValue: "https://raw.githubusercontent.com/cloudwan/edge-anki-config/master/track-config.json"}
+	{ name: 'trackConfig', alias: 't', type: String}
 ]
 // Read the actual options
 const options = commandLineArgs(optionDefinitions)
@@ -49,6 +49,7 @@ var lane;
 var that = this;
 var configCarNo;
 var configStartLane;
+var trackConfigPath;
 
 // Read properties and start receiving BLE messages
 config.read(options['config'], function (carNo, carId, startlane) {
@@ -88,7 +89,13 @@ config.read(options['config'], function (carNo, carId, startlane) {
             }
         });
 
-        configurationLoader = new TrackConfigurationLoader(options["trackConfig"]).getTrackConfig(function (trackConfiguration) {
+        if(!options["trackConfig"]) {
+            trackConfigPath = process.env.TRACK_CONFIG;
+        } else {
+            trackConfigPath = options["trackConfig"];
+        }
+
+        configurationLoader = new TrackConfigurationLoader(trackConfigPath).getTrackConfig(function (trackConfiguration) {
             //setup noble
             if (options['noble']) {
                 noble = noble_factory.create(options['noble'], carId, trackConfiguration);
@@ -241,7 +248,18 @@ function swapCar(command) {
     var newBluetoothId = '';
     if (commandArray.length > 0) {
         newBluetoothId = commandArray[1];
-        config.write(car.carNo, newBluetoothId, car.currentTileIndex, options['config']);
+
+        var startLane = configStartLane;
+        if(car !== undefined) {
+            startLane = car.laneNo;
+        }
+
+        if (startLane == undefined) {
+            startLane = 1;
+        }
+
+        config.write(configCarNo, newBluetoothId, startLane, options['config']);
+
     } else {
         console.log("INFO: No valid swap command");
     }
