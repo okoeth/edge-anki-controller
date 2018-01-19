@@ -47,6 +47,10 @@ module.exports = function() {
                 var carInitBluetoothId = process.env.CAR_INIT_BLUETOOTH_ID;
                 var carLaneNo = process.env.CAR_LANE_NO;
 
+                if(carLaneNo == -1) {
+                    carLaneNo = 1;
+                }
+
                 console.log("INFO: Writing config file with ", carNo, carInitBluetoothId, carLaneNo);
 
                 if(!carNo || !carInitBluetoothId || !carLaneNo) {

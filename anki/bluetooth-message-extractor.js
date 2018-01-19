@@ -20,7 +20,7 @@
 var MessageNames = require("./message-names");
 var PositionUpdateMessage = require('./messages/position-update-message');
 var PingMessage = require('./messages/ping-message');
-var VersionMessage = require('./messages/car-message');
+var VersionMessage = require('./messages/version-message');
 var BatteryMessage = require('./messages/battery-message');
 var TransitionUpdateMessage = require('./messages/transition-update-message');
 var DelocalizedMessage = require('./messages/vehicle-delocalized-message');
@@ -75,6 +75,11 @@ class BluetoothMessageExtractor {
         else if (msgID == '41') {
             // example: <Buffer 12 29 00 00 02 2b 55 c2 00 ff 81 46 00 00 00 00 00 25 32>
             var laneOffset = data.readFloatLE(4);
+            var pieceIndex = data.readInt8(2);
+            var pieceIndexPrevious = data.readInt8(3);
+            console.log("DEBUG: " + pieceIndex, " ," + pieceIndexPrevious + " ," + laneOffset);
+            console.log("DEBUG: Byte 6 " + data.readInt8(6));
+            console.log("DEBUG: Byte 7 " + data.readInt8(7));
             return new TransitionUpdateMessage(msgID, MessageNames.TRANSITION_UPDATE, msgTimestamp, laneOffset);
         }
 

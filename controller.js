@@ -47,10 +47,15 @@ const options = commandLineArgs(optionDefinitions)
 var car;
 var lane;
 var that = this;
+var configCarNo;
+var configStartLane;
 
 // Read properties and start receiving BLE messages
 config.read(options['config'], function (carNo, carId, startlane) {
 	try {
+        configCarNo = carNo;
+        configStartLane = startlane;
+
         // Read properties
         if (!carNo && isNaN(carNo * 1) && carNo > 0 && carNo < 5) {
             console.log('ERROR: Define carno as integer (1-4) in a properties file and pass in the name of the file as argv');
@@ -188,7 +193,11 @@ cli.on('line', function (cmd) {
                 newBluetoothId = commandArray[1];
             }
 
-            config.write(car.carNo, newBluetoothId, car.currentTileIndex, options['config']);
+            var startLane = configStartLane;
+            if(car !== undefined)
+                startLane = car.laneNo;
+
+            config.write(configCarNo, newBluetoothId, startLane, options['config']);
         }
 		else {
 			console.log("INFO: Send command from CLI");
