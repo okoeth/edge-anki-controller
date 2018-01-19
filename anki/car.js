@@ -79,7 +79,9 @@ class Car extends EventEmitter {
         // Handle disconnect
         peripheral.on('disconnect', function () {
             console.log('INFO: Car has been disconnected');
-            process.exit(0);
+
+            //Do not exit on battery power low, to be able to change the car
+            //process.exit(0);
         });
 
         // Handle connect
