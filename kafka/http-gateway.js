@@ -26,7 +26,8 @@ const io = require('socket.io-client');
 const WebSocket = require('ws');
 const PositionUpdateMessage = require('../anki/messages/position-update-message');
 
-var httpWebsocket = process.env.HTTP_WEBSOCKET;
+var httpAdasWebsocket = process.env.HTTP_WEBSOCKET;
+var httpTwinWebsocket = process.env.HTTP_TWIN_WEBSOCKET;
 var httpReceiverPort = process.env.HTTP_RECEIVER_PORT;
 
 class HttpGateway extends EventEmitter {
@@ -35,11 +36,18 @@ class HttpGateway extends EventEmitter {
         super();
         var that = this;
 
-        if (httpWebsocket==null || httpWebsocket==''){
-            console.log('Using localhost as default http websocket server.');
-            httpWebsocket='localhost:8003'
+        if (httpAdasWebsocket==null || httpAdasWebsocket==''){
+            console.log('Using localhost as default http adas websocket server.');
+            httpAdasWebsocket='localhost:8003'
         } else {
-            console.log('Using ' + httpWebsocket + 'as http websocket server.');
+            console.log('Using ' + httpAdasWebsocket + 'as http adas websocket server.');
+        }
+
+        if (httpTwinWebsocket==null || httpTwinWebsocket==''){
+            console.log('Using localhost as default http twin websocket server.');
+            httpTwinWebsocket='localhost:8001'
+        } else {
+            console.log('Using ' + httpTwinWebsocket + 'as http twin websocket server.');
         }
 
         if (httpReceiverPort==null || httpReceiverPort==''){
@@ -70,30 +78,59 @@ class HttpGateway extends EventEmitter {
     connectToSocket() {
         try {
             var that = this;
-            console.log("INFO: Trying to connect to websocket");
 
-            that.socket = new WebSocket('ws://' + httpWebsocket + '/status');
+            if(!that.adasSocket || that.adasSocket.readyState !== WebSocket.OPEN) {
+                console.log("INFO: Trying to connect to adas websocket");
+                that.adasSocket = new WebSocket('ws://' + httpAdasWebsocket + '/status');
 
-            that.socket.on('open', function open() {
-                console.log("INFO: Connected to websocket");
+                that.adasSocket.on('open', function open() {
+                    console.log("INFO: Connected to adas websocket");
 
-                if (that.connectInterval !== undefined) {
-                    clearInterval(that.connectInterval);
-                    that.connectInterval = undefined;
-                }
-            });
+                    if (that.connectInterval !== undefined) {
+                        clearInterval(that.connectInterval);
+                        that.connectInterval = undefined;
+                    }
+                });
 
-            that.socket.on('error', function(error) {
-                if (error != null) {
-                    console.log('%s', error);
-                    that.socket.close();
-                    that.socket = null;
-                }
-            });
+                that.adasSocket.on('error', function (error) {
+                    if (error != null) {
+                        console.log('%s', error);
+                        that.adasSocket.close();
+                        that.adasSocket = null;
+                    }
+                });
 
-            that.socket.on('disconnect', function(error) {
-                console.log("INFO: Disconnected from socket");
-            });
+                that.adasSocket.on('disconnect', function (error) {
+                    console.log("INFO: Disconnected from adasSocket");
+                });
+            }
+
+
+            if(!that.twinSocket|| that.twinSocket.readyState !== WebSocket.OPEN) {
+                console.log("INFO: Trying to connect to twin websocket");
+                that.twinSocket = new WebSocket('ws://' + httpTwinWebsocket + '/status');
+
+                that.twinSocket.on('open', function open() {
+                    console.log("INFO: Connected to twin websocket");
+
+                    if (that.connectInterval !== undefined) {
+                        clearInterval(that.connectInterval);
+                        that.connectInterval = undefined;
+                    }
+                });
+
+                that.twinSocket.on('error', function (error) {
+                    if (error != null) {
+                        console.log('%s', error);
+                        that.twinSocket.close();
+                        that.twinSocket = null;
+                    }
+                });
+
+                that.twinSocket.on('disconnect', function (error) {
+                    console.log("INFO: Disconnected from twinSocket");
+                });
+            }
         } catch(error) {
             console.error(error);
         }
@@ -101,7 +138,7 @@ class HttpGateway extends EventEmitter {
 
     checkConnection() {
         try {
-            if (this.socket === null || this.socket.readyState !== WebSocket.OPEN) {
+            if (this.adasSocket === null || this.adasSocket.readyState !== WebSocket.OPEN) {
                 if (this.connectInterval === undefined) {
                     this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
                 }
@@ -116,8 +153,15 @@ class HttpGateway extends EventEmitter {
             var csvMessage = message.toCSV();
             console.log("INFO: Http SendMessage invoked: ", csvMessage);
 
-            if(this.socket !== null && this.socket.readyState == WebSocket.OPEN) {
-                this.socket.send(csvMessage);
+            if(this.adasSocket !== null && this.adasSocket.readyState == WebSocket.OPEN) {
+                this.adasSocket.send(csvMessage);
+            }
+            else {
+                console.error('ERROR: A problem occurred when sending our message to adas');
+            }
+
+            if(this.twinSocket !== null && this.twinSocket.readyState == WebSocket.OPEN) {
+                this.twinSocket.send(JSON.stringify(message));
             }
             else {
                 console.error('ERROR: A problem occurred when sending our message to adas');
@@ -150,9 +194,13 @@ class HttpGateway extends EventEmitter {
     }
 
     disconnect() {
-        if(this.socket !== null)
-            this.socket.close();
-        this.socket = null
+        if(this.adasSocket !== null)
+            this.adasSocket.close();
+        this.adasSocket = null
+
+        if(this.twinSocket !== null)
+            this.twinSocket.close();
+        this.twinSocket = null;
 
     }
 

@@ -29,14 +29,8 @@ module.exports.create = function(type, carNo, carMessageGateway) {
         var Kafka = require("./kafka");
         return new Kafka(carNo);
     }
-    else if(type === "http") {
+    else {
         var HttpGateway = require("./http-gateway");
         return new HttpGateway(carNo);
-    }
-    else {
-        var MultiGateway = require("./multi-gateway");
-        var Kafka = require("./kafka");
-        var HttpGateway = require("./http-gateway");
-        return new MultiGateway(new Kafka(carNo), new HttpGateway(carNo));
     }
 };
