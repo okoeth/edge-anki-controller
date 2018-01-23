@@ -26,7 +26,7 @@ const io = require('socket.io-client');
 const WebSocket = require('ws');
 const PositionUpdateMessage = require('../anki/messages/position-update-message');
 
-var httpAdasWebsocket = process.env.HTTP_WEBSOCKET;
+var httpAdasWebsocket = process.env.HTTP_ADAS_WEBSOCKET;
 var httpTwinWebsocket = process.env.HTTP_TWIN_WEBSOCKET;
 var httpReceiverPort = process.env.HTTP_RECEIVER_PORT;
 
@@ -149,6 +149,7 @@ class HttpGateway extends EventEmitter {
     }
 
     sendMessage(message) {
+        //Send only position update + transition update to adas
         if(message instanceof PositionUpdateMessage) {
             var csvMessage = message.toCSV();
             console.log("INFO: Http SendMessage invoked: ", csvMessage);
@@ -160,37 +161,16 @@ class HttpGateway extends EventEmitter {
                 console.error('ERROR: A problem occurred when sending our message to adas');
             }
 
-            if(this.twinSocket !== null && this.twinSocket.readyState == WebSocket.OPEN) {
-                this.twinSocket.send(JSON.stringify(message));
-            }
-            else {
-                console.error('ERROR: A problem occurred when sending our message to adas');
-            }
         }
 
-        try {
-            /*var request = new http.ClientRequest({
-                hostname: "localhost",
-                port: 8089,
-                path: "/status",
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Content-Length": Buffer.byteLength(message)
-                }
-            });
-
-            request.on('error', function(e) {
-                console.log('ERROR: Could not send message to adas ' + e.message);
-            });
-
-            request.end(message);*/
-
-
-        } catch (err) {
+        //Send all messages to twin
+        if(this.twinSocket !== null && this.twinSocket.readyState == WebSocket.OPEN) {
+            this.twinSocket.send(JSON.stringify(message));
+        }
+        else {
             console.error('ERROR: A problem occurred when sending our message to adas');
-            console.error(err);
         }
+
     }
 
     disconnect() {
