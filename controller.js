@@ -108,7 +108,8 @@ config.read(options['config'], function (carNo, carId, startlane) {
                 if (state === 'poweredOn') {
                     var notDiscoveredTimeout = setTimeout(function () {
                         console.log("WARNING: Could not discover car");
-                        process.exit();
+                        //dont exit if car was not found, to be able to rewrite the config
+                        //process.exit();
                     }, 10000);
 
                     console.log('INFO: Start scanning for cars (ended after 2sec with timer)');
