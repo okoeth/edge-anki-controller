@@ -142,6 +142,10 @@ class HttpGateway extends EventEmitter {
                 if (this.connectInterval === undefined) {
                     this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
                 }
+            } else if (this.twinSocket === null || this.twinSocket.readyState !== WebSocket.OPEN) {
+                if (this.connectInterval === undefined) {
+                    this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
+                }
             }
         } catch (error) {
             console.error(error);
