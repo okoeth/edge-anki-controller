@@ -120,9 +120,6 @@ class Car extends EventEmitter {
                                 if (characteristic.uuid == 'be15bee06186407e83810bd89c4d8df4') {
                                     console.log('INFO: Read characteristic');
                                     that.carMessageGateway.setReadCharacteristics(characteristic, function(data) {
-
-
-
                                         var message = that.bluetoothMessageExtractor.generateMessage(data);
                                         try {
                                             if (message !== undefined) {
@@ -276,6 +273,22 @@ class Car extends EventEmitter {
                 this.isCurrentlyChangingLane = true;
             }
 
+            if(cmd.indexOf('s 0') > -1) {
+                //Send a fake message to adas with speed 0
+                if (this.currentTileIndex > -1) {
+                    var currentTile = this.positionCalculator.getTileByIndex(this.currentTileIndex);
+                    var posUpdateSpeed0 = new PositionUpdateMessage('39', 'POSITION_UPDATE', new Date(), this.position, this.realTileId, 0, 0);
+                    posUpdateSpeed0.posLocation = this.positionCalculator.getFirstTilePosition(currentTile, this.laneNo);
+                    posUpdateSpeed0.posTileNo = currentTile.realId;
+                    posUpdateSpeed0.posTileType = currentTile.type;
+                    posUpdateSpeed0.posOptions = [new PosOption(currentTile.id, 75)];
+                    posUpdateSpeed0.laneNo = this.laneNo;
+                    posUpdateSpeed0.carSpeed = 0;
+                    posUpdateSpeed0.laneLength = this.positionCalculator.getLaneLength(currentTile, this.laneNo);
+                    posUpdateSpeed0.maxTileNo = this.positionCalculator.getMaxTileNo();
+                    this.emit('messageReceived', this.addFieldsToMessage(posUpdateSpeed0));
+                }
+            }
             this.carMessageGateway.sendCommand(cmd);
         } catch(exception) {
             console.error(exception)

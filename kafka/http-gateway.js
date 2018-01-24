@@ -168,7 +168,7 @@ class HttpGateway extends EventEmitter {
             this.twinSocket.send(JSON.stringify(message));
         }
         else {
-            console.error('ERROR: A problem occurred when sending our message to adas');
+            console.error('ERROR: A problem occurred when sending our message to twin');
         }
 
     }
