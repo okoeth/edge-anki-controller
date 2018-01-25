@@ -45,6 +45,7 @@ class Car extends EventEmitter {
 
         this.validConfiguration = !trackConfiguration.outdated;
         this.isCurrentlyChangingLane = false;
+        this.breaking = false;
     }
 
     updateLocation(positionUpdateMessage) {
@@ -221,7 +222,9 @@ class Car extends EventEmitter {
                                                         setInterval(that.sendBatteryStatusRequest.bind(that), 180000)
                                                     }
 
-                                                    that.emit('messageReceived', that.addFieldsToMessage(message));
+                                                    //Don't send position update when car is breaking down
+                                                    if(!that.breaking)
+                                                        that.emit('messageReceived', that.addFieldsToMessage(message));
                                                 } else {
                                                     that.emit('messageReceived', message);
                                                 }
@@ -276,6 +279,7 @@ class Car extends EventEmitter {
             if(cmd.indexOf('s 0') > -1) {
                 //Send a fake message to adas with speed 0
                 if (this.currentTileIndex > -1) {
+                    this.breaking = true;
                     var currentTile = this.positionCalculator.getTileByIndex(this.currentTileIndex);
                     var posUpdateSpeed0 = new PositionUpdateMessage('39', 'POSITION_UPDATE', new Date(), this.position, this.realTileId, 0, 0);
                     posUpdateSpeed0.posLocation = this.positionCalculator.getFirstTilePosition(currentTile, this.laneNo);
@@ -288,6 +292,8 @@ class Car extends EventEmitter {
                     posUpdateSpeed0.maxTileNo = this.positionCalculator.getMaxTileNo();
                     this.emit('messageReceived', this.addFieldsToMessage(posUpdateSpeed0));
                 }
+            } else if(cmd.indexOf('s') > -1) {
+                this.breaking = false;
             }
             this.carMessageGateway.sendCommand(cmd);
         } catch(exception) {
