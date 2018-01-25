@@ -176,12 +176,17 @@ class Car extends EventEmitter {
                                                                 that.currentTile = that.positionCalculator.getTileByIndex(message.posOptions[0].optTileNo);
 
                                                                 message.posTileType = that.currentTile.type;
-                                                                if (message.laneNo !== undefined) {
+                                                                if (message.laneNo !== undefined &&
+                                                                    (that.laneNo-1 === message.laneNo ||
+                                                                    that.laneNo+1 === message.laneNo)) {
                                                                     message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
-                                                                    //Correct the lane every n-1 th tile
-                                                                    if(that.currentTileIndex % (message.maxTileNo-1) === 0 && !that.isCurrentlyChangingLane) {
-                                                                        console.log("DEBUG: Correcting lane to " + message.laneNo);
-                                                                        that.sendCommand("c " + message.laneNo);
+
+                                                                    //Correct the lane if its wrong
+                                                                    if(!that.isCurrentlyChangingLane) {
+                                                                        if(message.laneOffset !== that.positionCalculator.getLaneOffset(that.laneNo)) {
+                                                                            console.log("DEBUG: Correcting lane to " + message.laneNo);
+                                                                            that.sendCommand("c " + message.laneNo);
+                                                                        }
                                                                     }
                                                                 }
                                                             }

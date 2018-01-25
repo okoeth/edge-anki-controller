@@ -243,6 +243,18 @@ class TilePositionCalculator {
     getMaxTileNo() {
         return Object.keys(this.trackConfiguration.tiles).length;
     }
+
+    getLaneOffset(laneNo) {
+        if(laneNo === 1) {
+            return 68;
+        } else if (laneNo === 2) {
+            return 23;
+        } else if (laneNo === 3) {
+            return -23;
+        } else if(laneNo === 4) {
+            return -68;
+        }
+    }
 }
 
 module.exports = TilePositionCalculator;
