@@ -112,6 +112,7 @@ class TrackScanner {
                                 var lastTile = this.tiles[lastTileIndex]
 
                                 if(!this.init && lastTile.type == "CROSSING") {
+                                    console.log("SCANNER: Read crossing");
                                     this.inverseCurve = !this.inverseCurve;
                                 }
                                 this.init = false;
