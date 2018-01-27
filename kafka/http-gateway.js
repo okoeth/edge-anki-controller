@@ -29,6 +29,7 @@ const PositionUpdateMessage = require('../anki/messages/position-update-message'
 var httpAdasWebsocket = process.env.HTTP_ADAS_WEBSOCKET;
 var httpTwinWebsocket = process.env.HTTP_TWIN_WEBSOCKET;
 var httpReceiverPort = process.env.HTTP_RECEIVER_PORT;
+var httpBeatsWebsocket = process.env.HTTP_BEATS_WEBSOCKET;
 
 class HttpGateway extends EventEmitter {
 
@@ -46,6 +47,13 @@ class HttpGateway extends EventEmitter {
         if (httpTwinWebsocket==null || httpTwinWebsocket==''){
             console.log('Using localhost as default http twin websocket server.');
             httpTwinWebsocket='localhost:8001'
+        } else {
+            console.log('Using ' + httpTwinWebsocket + 'as http twin websocket server.');
+        }
+
+        if (httpBeatsWebsocket==null || httpBeatsWebsocket==''){
+            console.log('Using localhost as default http twin websocket server.');
+            httpBeatsWebsocket='localhost'
         } else {
             console.log('Using ' + httpTwinWebsocket + 'as http twin websocket server.');
         }
@@ -131,6 +139,32 @@ class HttpGateway extends EventEmitter {
                     console.log("INFO: Disconnected from twinSocket");
                 });
             }
+
+            if(!that.beatsSocket || that.beatsSocket.readyState !== WebSocket.OPEN) {
+                console.log("INFO: Trying to connect to beats websocket");
+                that.beatsSocket = new WebSocket('ws://' + httpBeatsWebsocket + '/status');
+
+                that.beatsSocket.on('open', function open() {
+                    console.log("INFO: Connected to betas websocket");
+
+                    if (that.connectInterval !== undefined) {
+                        clearInterval(that.connectInterval);
+                        that.connectInterval = undefined;
+                    }
+                });
+
+                that.beatsSocket.on('error', function (error) {
+                    if (error != null) {
+                        console.log('%s', error);
+                        that.beatsSocket.close();
+                        that.beatsSocket = null;
+                    }
+                });
+
+                that.beatsSocket.on('disconnect', function (error) {
+                    console.log("INFO: Disconnected from beatsSocket");
+                });
+            }
         } catch(error) {
             console.error(error);
         }
@@ -143,6 +177,10 @@ class HttpGateway extends EventEmitter {
                     this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
                 }
             } else if (this.twinSocket === null || this.twinSocket.readyState !== WebSocket.OPEN) {
+                if (this.connectInterval === undefined) {
+                    this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
+                }
+            } else if (this.beatsSocket === null || this.beatsSocket.readyState !== WebSocket.OPEN) {
                 if (this.connectInterval === undefined) {
                     this.connectInterval = setInterval(this.connectToSocket.bind(this), 5000)
                 }
@@ -175,6 +213,14 @@ class HttpGateway extends EventEmitter {
             console.error('ERROR: A problem occurred when sending our message to twin');
         }
 
+        //Send all messages to beats
+        if(this.beatsSocket !== null && this.beatsSocket.readyState == WebSocket.OPEN) {
+            this.beatsSocket.send(JSON.stringify(message));
+        }
+        else {
+            console.error('ERROR: A problem occurred when sending our message to beats');
+        }
+
     }
 
     disconnect() {
@@ -185,6 +231,10 @@ class HttpGateway extends EventEmitter {
         if(this.twinSocket !== null)
             this.twinSocket.close();
         this.twinSocket = null;
+
+        if(this.beatsSocket !== null)
+            this.beatsSocket.close();
+        this.beatsSocket = null;
 
     }
 
