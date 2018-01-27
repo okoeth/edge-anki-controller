@@ -52,10 +52,10 @@ class HttpGateway extends EventEmitter {
         }
 
         if (httpBeatsWebsocket==null || httpBeatsWebsocket==''){
-            console.log('Using localhost as default http twin websocket server.');
-            httpBeatsWebsocket='localhost'
+            console.log('Using localhost as default http beats websocket server.');
+            httpBeatsWebsocket='localhost:8004'
         } else {
-            console.log('Using ' + httpTwinWebsocket + 'as http twin websocket server.');
+            console.log('Using ' + httpBeatsWebsocket + 'as http beats websocket server.');
         }
 
         if (httpReceiverPort==null || httpReceiverPort==''){
@@ -145,7 +145,7 @@ class HttpGateway extends EventEmitter {
                 that.beatsSocket = new WebSocket('ws://' + httpBeatsWebsocket + '/status');
 
                 that.beatsSocket.on('open', function open() {
-                    console.log("INFO: Connected to betas websocket");
+                    console.log("INFO: Connected to beatss websocket");
 
                     if (that.connectInterval !== undefined) {
                         clearInterval(that.connectInterval);
