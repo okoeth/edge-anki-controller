@@ -128,6 +128,7 @@ class Car extends EventEmitter {
                                                     console.log("INFO: Received message: " + JSON.stringify(message));
 
                                                     if (message instanceof TransitionUpdateMessage) {
+
                                                         if (that.currentTileIndex > -1) {
                                                             //Interpolate
                                                             that.currentTileIndex = that.positionCalculator.getNextTileIndex(that.currentTileIndex);

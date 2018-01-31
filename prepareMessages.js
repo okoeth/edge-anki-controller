@@ -127,23 +127,19 @@ module.exports = function() {
 	  }
 
       if (cmd == "l") { // change lights
-        // something happens but I don't understand the parameters yet
+        //On
 	    message = new Buffer(3);
 	    message.writeUInt8(0x02, 0);
 	    message.writeUInt8(0x1d, 1);
 	    message.writeUInt8(140, 2);
-	    }
+	  }
 
 	  if (cmd == "lp") { // change lights pattern
-	    // something happens but I don't understand the parameters yet
-	    message = new Buffer(8);
-	    message.writeUInt8(0x07, 0);
-	    message.writeUInt8(0x33, 1);
-	    message.writeUInt8(5, 2);
-	    message.writeUInt8(1, 3);
-	    message.writeUInt8(1, 4);
-	    message.writeUInt8(5, 5);
-	    message.writeUInt16BE(0, 6);
+		  //off
+          message = new Buffer(3);
+          message.writeUInt8(0x02, 0);
+          message.writeUInt8(0x1d, 1);
+          message.writeUInt8(15, 2);
 	  }
 
 	  if (cmd == "sdk") { // turn on sdk
