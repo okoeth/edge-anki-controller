@@ -45,6 +45,7 @@ class Car extends EventEmitter {
 
         this.validConfiguration = !trackConfiguration.outdated;
         this.isCurrentlyChangingLane = false;
+        this.currentlyChangingLaneTimeout = null;
         this.breaking = false;
     }
 
@@ -179,8 +180,8 @@ class Car extends EventEmitter {
                                                                 message.posTileType = that.currentTile.type;
                                                                 if (message.laneNo !== undefined) {
                                                                     message.laneLength = that.positionCalculator.getLaneLength(that.currentTile, message.laneNo);
-                                                                    //Correct the lane every n-1 th tile
-                                                                    if(that.currentTileIndex % (message.maxTileNo-1) === 0 && !that.isCurrentlyChangingLane) {
+                                                                    //Correct the lane every n/2 th tile
+                                                                    if(that.currentTileIndex % (message.maxTileNo/2) === 0 && !that.isCurrentlyChangingLane) {
                                                                         if(Math.abs(message.laneOffset-that.positionCalculator.getLaneOffset(message.laneNo)) > 3) {
                                                                             console.log("DEBUG: Correcting lane to " + message.laneNo);
                                                                             that.sendCommand("c " + message.laneNo);
@@ -212,10 +213,6 @@ class Car extends EventEmitter {
                                                     }
                                                     else if (message instanceof VehicleDelocalizedMessage) {
                                                         that.resetLocation();
-                                                    }
-                                                    else if (message instanceof OffsetChangedMessage) {
-                                                        console.log("DEBUG: Currently changing lane set to false");
-                                                        that.isCurrentlyChangingLane = false;
                                                     }
                                                     else if(message instanceof CarInitialisedMessage) {
                                                         console.log("INFO: Car initialised");
@@ -277,6 +274,12 @@ class Car extends EventEmitter {
             if(cmd.indexOf('c') > -1) {
                 console.log("DEBUG: Currently changing lane set to true");
                 this.isCurrentlyChangingLane = true;
+
+                console.log("DEBUG: " + this.currentlyChangingLaneTimeout);
+                if(this.currentlyChangingLaneTimeout !== null) {
+                    clearTimeout(this.currentlyChangingLaneTimeout);
+                }
+                this.currentlyChangingLaneTimeout = setTimeout(this.clearChangingLane.bind(this), 3000);
             }
 
             if(cmd.indexOf('s 0') > -1) {
@@ -302,6 +305,12 @@ class Car extends EventEmitter {
         } catch(exception) {
             console.error(exception)
         }
+    }
+
+    clearChangingLane() {
+        console.log("DEBUG: Currently changing lane set to false");
+        this.isCurrentlyChangingLane = false;
+        this.currentlyChangingLaneTimeout = null;
     }
 
     addFieldsToMessage(message) {
